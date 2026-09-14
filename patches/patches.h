@@ -22,11 +22,27 @@
 #define osGetTime osGetTime_recomp
 #define osWritebackDCache osWritebackDCache_recomp
 #define osInvalDCache osInvalDCache_recomp
+#define osVirtualToPhysical osVirtualToPhysical_recomp
 
 #include "common.h"
 #include "global.h"
 
 #include "rt64_extended_gbi.h"
+
+// A fill rectangle whose left and right edges are each placed relative to an
+// origin of the widened frame. RT64 implements the command (G_EX_FILLRECT_V1,
+// fillrectV1 in src/gbi/rt64_gbi_extended.cpp) but the header at this revision
+// defines no macro for it. Coordinates are whole pixels on the 320x240 screen.
+#ifndef gEXFillRectangle
+#define gEXFillRectangle(cmd, lorigin, rorigin, ulx, uly, lrx, lry) \
+    G_EX_COMMAND2(cmd, \
+        PARAM(RT64_EXTENDED_OPCODE, 8, 24) | PARAM(G_EX_FILLRECT_V1, 24, 0), \
+        PARAM(lorigin, 12, 0) | PARAM(rorigin, 12, 12), \
+        \
+        PARAM((ulx) * 4, 16, 16) | PARAM((uly) * 4, 16, 0), \
+        PARAM((lrx) * 4, 16, 16) | PARAM((lry) * 4, 16, 0) \
+    )
+#endif
 
 // ---- Host functions: implemented by the port in C++ (src/patch_host.cpp) ----
 //
@@ -37,5 +53,10 @@
 
 // Called once per frame the game presents, from the scheduler.
 void pw64_frame_presented(void);
+
+// How much wider than 4:3 RT64 is drawing the 3D view: the window's aspect over
+// 4:3 when Aspect Ratio is Expand, and 1 otherwise (or for a window narrower
+// than 4:3, where RT64 does not narrow the view).
+f32 pw64_widescreen_factor(void);
 
 #endif

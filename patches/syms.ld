@@ -15,6 +15,8 @@ osViSwapBuffer_recomp = 0x8F000008;
 osGetTime_recomp = 0x8F00000C;
 osWritebackDCache_recomp = 0x8F000010;
 osInvalDCache_recomp = 0x8F000014;
+osVirtualToPhysical_recomp = 0x8F000018;
 
 /* The port's own, in src/patch_host.cpp. */
 pw64_frame_presented = 0x8F001000;
+pw64_widescreen_factor = 0x8F001004;

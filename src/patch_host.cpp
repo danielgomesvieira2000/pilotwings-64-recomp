@@ -5,6 +5,7 @@
 // signature. Arguments arrive in the MIPS O32 registers (a0-a3 are ctx->r4 to
 // ctx->r7) and results go back in v0 (ctx->r2) or, for a float, f0.
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -15,6 +16,9 @@
 #include "recomp.h"
 
 #include <ultramodern/ultramodern.hpp>
+#include <ultramodern/config.hpp>
+
+#include "pw64/callbacks.h"
 
 extern "C" {
 
@@ -61,6 +65,18 @@ void pw64_frame_presented(uint8_t* rdram, recomp_context* ctx) {
                          " (display %u Hz)\n",
                  rate, presented, ultramodern::get_display_refresh_rate());
     std::fflush(stderr);
+}
+
+// See pw64_widescreen_factor in patches/patches.h. Returned in f0, where the
+// MIPS calling convention puts a float result.
+void pw64_widescreen_factor(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    float factor = 1.0f;
+    if (ultramodern::renderer::get_graphics_config().ar_option ==
+        ultramodern::renderer::AspectRatio::Expand) {
+        factor = std::max(1.0f, pw64::window_aspect() / (4.0f / 3.0f));
+    }
+    ctx->f0.fl = factor;
 }
 
 }  // extern "C"

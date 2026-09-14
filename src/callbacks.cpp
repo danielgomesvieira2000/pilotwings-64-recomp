@@ -1232,6 +1232,15 @@ void update_gfx(ultramodern::gfx_callbacks_t::gfx_data_t) {
 
 namespace pw64 {
 
+float window_aspect() {
+    int w = 0;
+    int h = 0;
+    if (g_window != nullptr) {
+        SDL_GetWindowSize(g_window, &w, &h);
+    }
+    return (w > 0 && h > 0) ? static_cast<float>(w) / static_cast<float>(h) : 4.0f / 3.0f;
+}
+
 void set_mute_when_unfocused(bool mute) {
     g_mute_unfocused.store(mute, std::memory_order_relaxed);
 }

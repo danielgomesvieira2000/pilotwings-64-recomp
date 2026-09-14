@@ -33,6 +33,9 @@ void set_mute_when_unfocused(bool mute);
 
 void shutdown_platform();
 
+// The game window's width over its height, or 4:3 before there is a window.
+float window_aspect();
+
 // Defined in src/sections.cpp, which owns the generated section table.
 void register_sections();
 // Moves any section librecomp's contiguous boot load registered at the wrong

@@ -29,7 +29,8 @@ rm -rf RecompiledFuncs
 mkdir -p RecompiledFuncs
 
 echo "=== N64Recomp: the game ==="
-"$BIN/N64Recomp" recomp/pilotwings64.us.toml 2> "$REPO/RecompiledFuncs/recompile.log" || {
+python3 tools/gen_mdebug_mappings.py
+"$BIN/N64Recomp" recomp/pilotwings64.us.full.toml 2> "$REPO/RecompiledFuncs/recompile.log" || {
     grep -v '^\[WARN\]' "$REPO/RecompiledFuncs/recompile.log" | tail -20 >&2
     exit 1
 }
@@ -44,7 +45,7 @@ echo "=== reference symbols for the patches (dump.toml, data_dump.toml) ==="
 # The C patches are recompiled against these: they name every function and
 # data symbol in the game, so a patch can call and read the game by name.
 mkdir -p RecompiledFuncs/context
-(cd RecompiledFuncs/context && "$BIN/N64Recomp" ../../recomp/pilotwings64.us.toml --dump-context > /dev/null)
+(cd RecompiledFuncs/context && "$BIN/N64Recomp" ../../recomp/pilotwings64.us.full.toml --dump-context > /dev/null)
 
 echo "=== declarations for runtime-provided libultra ==="
 python3 tools/gen_reimplemented_decls.py

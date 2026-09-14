@@ -21,6 +21,7 @@ baserom*
 /RecompiledPatches/
 dump.toml
 data_dump.toml
+/recomp/pilotwings64.us.full.toml
 
 # Build. Any build*/ directory.
 /build*/

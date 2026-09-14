@@ -464,7 +464,9 @@ if(PW64_WITH_FRONTEND)
 
     set(PW64_RMLUI_ASSETS
         "${PW64_LIB_DIR}/RecompFrontend/recompui/lib/RmlUi/Samples/assets")
-    add_custom_command(TARGET Pilotwings64Recomp POST_BUILD
+    # A target of its own rather than a post-link step, so that editing an asset
+    # restages it without relinking an executable nothing else changed in.
+    add_custom_target(pw64_assets ALL
         COMMAND ${CMAKE_COMMAND} -E make_directory "${PW64_ASSET_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_CURRENT_SOURCE_DIR}/assets/recomp.rcss"
@@ -482,7 +484,8 @@ if(PW64_WITH_FRONTEND)
                 "${CMAKE_CURRENT_SOURCE_DIR}/assets/promptfont/promptfont.ttf"
                 "${CMAKE_CURRENT_SOURCE_DIR}/assets/promptfont/LICENSE.txt"
                 "${PW64_ASSET_DIR}/promptfont"
-        COMMENT "Staging the frontend's stylesheet and fonts")
+        COMMENT "Staging the frontend's stylesheet, fonts and icons")
+    add_dependencies(Pilotwings64Recomp pw64_assets)
 endif()
 
 if(PW64_WITH_RECOMPILED)
