@@ -1,11 +1,9 @@
+SlotMap by Sergey Makeev -- used by recompui.
+Source: lib/RecompFrontend/lib/SlotMap/slot_map.h.
+
 MIT License
 
-Copyright (c) 2026 Pilotwings 64: Recompiled contributors
-
-This license covers the original code in this repository only. It does not
-cover Pilotwings 64 or any part of it. No game code or assets are distributed
-here; the tooling operates on a dump the user supplies. Pilotwings 64 is the
-property of Nintendo, which is not affiliated with this project.
+Copyright (c) 2022 Sergey Makeev
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

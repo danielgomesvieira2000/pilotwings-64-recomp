@@ -8,6 +8,25 @@ rewritten. What was actually found, phase by phase, goes in
 the findings goes in [PORTING.md](PORTING.md) (port facts) and
 [GAME-INTERNALS.md](GAME-INTERNALS.md) (game facts).
 
+> **Where the work departed from this plan** (added at 0.1.0):
+>
+> - *Phase 08* chose interpolation without trying to run the game faster: the
+>   game already runs at the VI rate, 60, so the only gain would have come from
+>   changing the runtime's VI rate under a physics step never tuned for it.
+>   Effects are interpolated (with RT64's own ordering in a group per effect)
+>   rather than ignored: with the camera baked into their matrices, ignoring
+>   them made them shake. The gate's "at 120+ Hz" was verified with the game
+>   slowed to 20 on a 60 Hz display, not on a faster display.
+> - *Phases 04, 05 and 07*: testing every mode found that the game's busy waits
+>   stall for seconds under the runtime's scheduling (fixed in `uvClkGetSec`),
+>   and that two screens draw the border inline (fixed in `uvVtxRect`). See
+>   [findings/phase-08.md](findings/phase-08.md).
+> - *Phases 05 and 06* have no findings document of their own: the harness,
+>   audio path and frontend came from Wave Race 64: Recompiled and worked on the
+>   first run; what changed is in [findings/phase-00-04.md](findings/phase-00-04.md).
+> - The pause menu, the photo album and the options screen have not been checked
+>   in widescreen.
+
 ## Goal
 
 A native PC port of **Pilotwings 64 (USA)** built by static recompilation with

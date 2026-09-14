@@ -1,11 +1,9 @@
+DirectX Shader Compiler (dxcompiler.dll, dxil.dll), shipped with the Windows build.
+LICENCE-MIT.txt from the official release archive dxc_2026_07_29.zip (v1.9.2607), https://github.com/microsoft/DirectXShaderCompiler/releases; the DLLs in lib/RT64/src/contrib/dxc may be an earlier release.
+
+Copyright (c) Microsoft Corporation.
+
 MIT License
-
-Copyright (c) 2026 Pilotwings 64: Recompiled contributors
-
-This license covers the original code in this repository only. It does not
-cover Pilotwings 64 or any part of it. No game code or assets are distributed
-here; the tooling operates on a dump the user supplies. Pilotwings 64 is the
-property of Nintendo, which is not affiliated with this project.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17,7 +15,7 @@ furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER

@@ -3,10 +3,11 @@
 This project's own code (`src/`, `include/`, `patches/`, `tools/`, `recomp/`,
 `assets/icons/`, `assets/recomp.rcss`) is under the MIT License in `LICENSE`.
 A built executable also contains, or ships beside, the following, under their own
-terms. **Every release carries these license texts in its `licenses/` folder**
-(inside the app bundle's `Contents/Resources` on macOS); the list it is built
-from is `tools/third_party_licenses.txt`, and the texts that exist only in a
-source file's header are copied into `licenses/` in this repository.
+terms. **Every release carries these license texts in its `licenses/` folder**;
+the list it is built from is `tools/third_party_licenses.txt`, and the texts that
+exist only in a source file's header are copied into `licenses/` in this
+repository. The port is built and tested on Windows; the Linux and macOS notes
+below describe what the shared runtime does on those platforms.
 
 Portions of this software are copyright © The FreeType Project
 (www.freetype.org). All rights reserved.
@@ -15,6 +16,7 @@ Portions of this software are copyright © The FreeType Project
 
 | Component | Role | License | Text |
 |---|---|---|---|
+| [Pilotwings64Decomp](https://github.com/gcsmith/Pilotwings64Decomp) (Garrett Smith and contributors) | the matching decompilation the ELF is built from; the C patches compile against its headers and several are adapted from its functions | MIT | `lib/Pilotwings64Decomp/LICENSE` |
 | [N64ModernRuntime](https://github.com/N64Recomp/N64ModernRuntime) (librecomp, ultramodern) | the runtime the recompiled game runs on | **GPL-3.0** | `lib/N64ModernRuntime/COPYING` |
 | [N64Recomp](https://github.com/N64Recomp/N64Recomp) (with LiveRecomp, SymbolLists), RSPRecomp | the recompiler; its runtime headers and the LiveRecomp libraries are linked in | MIT | `lib/N64ModernRuntime/N64Recomp/LICENSE` |
 | [RT64](https://github.com/rt64/rt64) | the renderer | MIT | `lib/RT64/LICENSE` |
@@ -82,9 +84,6 @@ than this project's code.
   and `rt64_math.cpp` adapts part of glm (MIT). These are RT64's to settle.
 - **PromptFont's license file has no copyright line**, upstream as here; the OFL
   expects one. Its author is named above from the upstream repository.
-- **The macOS bundle's SDL2, libpng and FreeType** are built from downloaded
-  sources by `tools/build_macos_dependencies.sh`; SDL2's and FreeType's texts are
-  in `licenses/`, libpng's (libpng-2.0) is not yet included.
 
 ## What this means for a built executable
 
@@ -101,23 +100,30 @@ submodule, as the other N64: Recompiled projects do, and does not vendor a copy.
 Anyone intending to distribute a built executable should resolve this with the
 RecompFrontend authors first.
 
-## The reference decompilation
+## The decompilation
 
-The build pipeline uses the [Wave Race 64 decompilation](https://github.com/LLONSIT/Wave-Race-64)
-by LLONSIT and contributors as its source of function names, segment layout
-and splat configuration. That repository publishes no license. Nothing copied
-from it is committed here: the builder clones it into `reference/`, which is
-ignored, and the splat config this project derives from its config
-(`recomp/pw64.us.rev1.asm.yaml`) is generated on the builder's machine and
-ignored too. The function names that appear in this project's own sources and
-documents are used as identifiers for the routines they name.
+The build compiles the [Pilotwings 64 decompilation](https://github.com/gcsmith/Pilotwings64Decomp)
+by Garrett Smith and contributors (MIT) from the builder's own dump into the ELF
+N64Recomp reads. It is a submodule at `lib/Pilotwings64Decomp`, pinned, and is
+never edited. The patches in `patches/` include its headers, and those that
+replace a game function start from the decompilation's C for that function and
+say so in a comment above it; that code is used under the decompilation's MIT
+License, whose text ships in every release as `licenses/Pilotwings64Decomp.txt`.
+
+Nothing the decompilation builds from the dump -- its split assets and
+assembly, the ELF, the ROM image -- is committed here.
+
+An independent recompilation, [gcsmith/Pilotwings64Recomp](https://github.com/gcsmith/Pilotwings64Recomp),
+is GPL-3.0. No code is taken from it. Three facts learned from it, the hardware
+register accesses the runtime cannot serve, are credited where they are used
+(`recomp/pilotwings64.us.toml`).
 
 ## Artwork
 
-The launcher background (`assets/icons/Logo.svg`), the executable's icon
-generated from it, and the menu icons in `assets/icons/` were created for this
-project with Claude, Anthropic's AI model, at the direction of the project's
-author, and are released under the project's MIT License to the extent that
+The launcher background (`assets/icons/Logo.svg`) and the executable's icon
+(`assets/AppIcon.ico`), both drawn by `tools/make_logo.py`, and the menu icons in
+`assets/icons/` were created for these projects with Claude, Anthropic's AI
+model, at the direction of the project's author, and are released under the project's MIT License to the extent that
 rights in them exist. Whether purely AI-generated images attract copyright at
 all is unsettled and varies by jurisdiction; no claim is made beyond what the
 law allows, and nothing in them is taken from the game.
