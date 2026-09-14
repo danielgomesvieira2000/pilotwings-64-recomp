@@ -56,6 +56,11 @@ ignored = [
     "hudDrawCamera",      # patches/hud.c
     "hudDrawBox",         # patches/hud.c
     "uvFontGenDlist",     # patches/hud.c
+    "uvGfxMtxProjPushF",  # patches/interpolation.c
+    "_uvDobjsDraw",       # patches/interpolation.c
+    "uvDobj_8021771C",    # patches/interpolation.c
+    "uvChan_80205CE4",    # patches/interpolation.c
+    "_uvEnvDraw",         # patches/interpolation.c
 ]
 
 # Three instructions touch hardware the runtime has no model of. Each is a nop

@@ -74,7 +74,7 @@ def main():
     ap.add_argument("start", type=float, help="seconds after launch to start saving")
     ap.add_argument("end", type=float, help="seconds after launch to stop and close the port")
     ap.add_argument("--scale", type=float, default=0.5)
-    ap.add_argument("--exe", default=os.path.join(REPO, "build-fe", "Pilotwings64Recomp.exe"))
+    ap.add_argument("--exe", default=os.path.join(REPO, "build", "Pilotwings64Recomp.exe"))
     ap.add_argument("--rom", default=None, help="the dump; without it the launcher's remembered one is used")
     ap.add_argument("--env", action="append", default=[], metavar="NAME=VALUE")
     args = ap.parse_args()

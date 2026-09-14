@@ -33,6 +33,7 @@
 // nothing per-screen is needed here.
 
 #include "patches.h"
+#include "interpolation.h"
 
 #include "uv_chan.h"
 #include "uv_dobj.h"
@@ -184,6 +185,9 @@ RECOMP_PATCH void uvChan_80204FE4(s32 arg0) {
         temp_s0->unk398();
     }
     func_80206318(temp_s0);
+    // The channel's projections and everything it draws are the camera's
+    // group; see patches/interpolation.c.
+    interpCameraBegin(arg0, temp_s0);
     uvGfxMtxProj(temp_s0->unk50);
     uvGfxPushMtxUnk(&temp_s0->unk190);
     gSPPerspNormalize(gGfxDisplayListHead++, (s16)(131072.0f / (temp_s0->unk1FC + temp_s0->unk1F8)));
@@ -270,4 +274,5 @@ RECOMP_PATCH void uvChan_80204FE4(s32 arg0) {
     if (temp_s0->unk39C != NULL) {
         temp_s0->unk39C();
     }
+    interpCameraEnd();
 }

@@ -12,6 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <thread>
 
 #include "recomp.h"
 
@@ -21,6 +22,10 @@
 #include "pw64/callbacks.h"
 
 extern "C" {
+
+// Added to RT64 by tools/patch_rt64_pairing.py.
+void RT64_GetTransformPairing(unsigned long long* frames, unsigned long long* total, unsigned long long* ignored,
+                              unsigned long long* unpaired, unsigned long long* unpaired_moved);
 
 // Called by the _uvScDoneGfx patch (patches/framerate.c) once per frame the game
 // presents. Counting those over a two-second window is the game's frame rate,
@@ -33,6 +38,29 @@ void pw64_frame_presented(uint8_t* rdram, recomp_context* ctx) {
     (void)ctx;
 
     using clock = std::chrono::steady_clock;
+
+    // Test knob: PW64_GAME_RATE=30 holds the game to 30 frames per second (or any
+    // rate below the display's). In the port the game runs at the VI rate, 60,
+    // which on a 60 Hz display leaves RT64 no frames to generate -- so on such a
+    // machine interpolation cannot be seen, let alone checked, without slowing
+    // the game down. The game measures its own frame time, so it plays at normal
+    // speed, just in fewer steps. Sleeping here stalls the scheduler thread, which
+    // is the point; the audio may crackle while it is set. Not a setting.
+    static const double game_rate = [] {
+        const char* value = std::getenv("PW64_GAME_RATE");
+        return value != nullptr ? std::atof(value) : 0.0;
+    }();
+    if (game_rate > 0.0) {
+        static clock::time_point next_frame = clock::now();
+        const auto period = std::chrono::duration_cast<clock::duration>(std::chrono::duration<double>(1.0 / game_rate));
+        const auto now = clock::now();
+        if (now < next_frame) {
+            std::this_thread::sleep_until(next_frame);
+            next_frame += period;
+        } else {
+            next_frame = now + period;
+        }
+    }
     static clock::time_point window_start = clock::now();
     static uint32_t frames = 0;
     static int last_rate = -1;
@@ -48,6 +76,30 @@ void pw64_frame_presented(uint8_t* rdram, recomp_context* ctx) {
     const int rate = static_cast<int>(std::lround(frames / seconds));
     window_start = clock::now();
     frames = 0;
+
+    // PW64_PAIRING=1: how well RT64 is pairing transforms for interpolation, over
+    // the same window (tools/patch_rt64_pairing.py). Only meaningful while RT64 is
+    // generating frames, which needs the display faster than the game.
+    static const bool pairing = std::getenv("PW64_PAIRING") != nullptr;
+    if (pairing) {
+        unsigned long long p_frames = 0, p_total = 0, p_ignored = 0, p_unpaired = 0, p_moved = 0;
+        RT64_GetTransformPairing(&p_frames, &p_total, &p_ignored, &p_unpaired, &p_moved);
+        static unsigned long long l_frames = 0, l_total = 0, l_ignored = 0, l_unpaired = 0, l_moved = 0;
+        const unsigned long long d_frames = p_frames - l_frames;
+        if (d_frames > 0) {
+            std::fprintf(stderr,
+                         "[pw64] interpolation: %.0f transforms a frame, %.1f not interpolated by request,"
+                         " %.1f unpaired (%.1f of them moved or new)\n",
+                         double(p_total - l_total) / d_frames, double(p_ignored - l_ignored) / d_frames,
+                         double(p_unpaired - l_unpaired) / d_frames, double(p_moved - l_moved) / d_frames);
+            std::fflush(stderr);
+        }
+        l_frames = p_frames;
+        l_total = p_total;
+        l_ignored = p_ignored;
+        l_unpaired = p_unpaired;
+        l_moved = p_moved;
+    }
 
     static const bool every_window = [] {
         const char* value = std::getenv("PW64_FRAME_STATS");
@@ -65,6 +117,26 @@ void pw64_frame_presented(uint8_t* rdram, recomp_context* ctx) {
                          " (display %u Hz)\n",
                  rate, presented, ultramodern::get_display_refresh_rate());
     std::fflush(stderr);
+}
+
+// A diagnostic print from a patch: a tag and three integers (a0-a3), printed
+// when PW64_PATCH_DEBUG is set.
+void pw64_debug(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    static const bool enabled = std::getenv("PW64_PATCH_DEBUG") != nullptr;
+    if (!enabled) {
+        return;
+    }
+    std::fprintf(stderr, "[pw64-patch] tag %u: %d %d %d\n", static_cast<uint32_t>(ctx->r4),
+                 static_cast<int32_t>(ctx->r5), static_cast<int32_t>(ctx->r6),
+                 static_cast<int32_t>(ctx->r7));
+}
+
+// See pw64_interp_tags_enabled in patches/patches.h.
+void pw64_interp_tags_enabled(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    static const bool disabled = std::getenv("PW64_NO_INTERP_TAGS") != nullptr;
+    ctx->r2 = disabled ? 0 : 1;
 }
 
 // See pw64_widescreen_factor in patches/patches.h. Returned in f0, where the

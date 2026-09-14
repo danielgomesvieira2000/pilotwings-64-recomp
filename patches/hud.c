@@ -46,14 +46,6 @@ void hudDrawCamera(HUDState* hud);
 
 #define CAMERA_SHUTTER_FRAMES 3
 
-// gSPClipRatio with the ratio as a value; see patches/widescreen.c.
-static void clipRatio(s32 ratio) {
-    gMoveWd(gGfxDisplayListHead++, G_MW_CLIP, G_MWO_CLIP_RNX, ratio);
-    gMoveWd(gGfxDisplayListHead++, G_MW_CLIP, G_MWO_CLIP_RNY, ratio);
-    gMoveWd(gGfxDisplayListHead++, G_MW_CLIP, G_MWO_CLIP_RPX, 0x10000 - ratio);
-    gMoveWd(gGfxDisplayListHead++, G_MW_CLIP, G_MWO_CLIP_RPY, 0x10000 - ratio);
-}
-
 // The HUD's own orthographic projection (hudMainRender), shifted sideways.
 static void hudProjection(f32 shift) {
     Mtx4F ortho;

@@ -78,4 +78,12 @@ f32 pw64_widescreen_factor(void);
 // part of it for 16:9) the way RT64 scales its own extended origins.
 f32 pw64_hud_margin(void);
 
+// Prints a tag and three integers when PW64_PATCH_DEBUG is set. Integers only,
+// so all four arguments travel in a0-a3.
+void pw64_debug(u32 tag, s32 a, s32 b, s32 c);
+
+// Whether patches/interpolation.c emits its matrix groups: yes unless
+// PW64_NO_INTERP_TAGS is set, which is for measuring RT64 without them.
+s32 pw64_interp_tags_enabled(void);
+
 #endif

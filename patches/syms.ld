@@ -21,3 +21,5 @@ osVirtualToPhysical_recomp = 0x8F000018;
 pw64_frame_presented = 0x8F001000;
 pw64_widescreen_factor = 0x8F001004;
 pw64_hud_margin = 0x8F001008;
+pw64_debug = 0x8F00100C;
+pw64_interp_tags_enabled = 0x8F001010;

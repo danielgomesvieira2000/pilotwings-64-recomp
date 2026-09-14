@@ -18,6 +18,7 @@ SCRIPTS = [
     "patch_librecomp.py",          # librecomp: report the caller of a failed lookup
     "patch_runtime_shutdown.py",   # ultramodern: join workers before freeing RDRAM
     "patch_rt64_eventfilter.py",   # RT64: take the SDL event filter back off
+    "patch_rt64_pairing.py",       # RT64: count interpolation pairing (PW64_PAIRING)
     "patch_macos.py",              # RT64's hlsl++: <stdlib.h> for labs on macOS
     "patch_recompinput.py",        # RecompFrontend: assign pads in connection order
 ]
