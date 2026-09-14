@@ -43,7 +43,8 @@ ignored = [
     "_uvScDoneGfx",     # patches/framerate.c
     "uvGfxBegin",       # patches/gfx.c
     "uvGfxClearScreen", # patches/gfx.c
-    "drawScreenBorder", # patches/widescreen.c
+    "uvVtxRect",        # patches/widescreen.c
+    "uvVtxEndPoly",     # patches/widescreen.c
     "uvChan_80204C94",  # patches/widescreen.c
     "uvChan_80204D94",  # patches/widescreen.c
     "uvChan_80204FE4",  # patches/widescreen.c
@@ -61,6 +62,7 @@ ignored = [
     "uvDobj_8021771C",    # patches/interpolation.c
     "uvChan_80205CE4",    # patches/interpolation.c
     "_uvEnvDraw",         # patches/interpolation.c
+    "uvClkGetSec",        # patches/clocks.c
 ]
 
 # Three instructions touch hardware the runtime has no model of. Each is a nop

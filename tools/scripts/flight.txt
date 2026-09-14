@@ -10,6 +10,10 @@
 #
 # The presses are repeated on purpose: menus animate in before they accept
 # input, and a press that arrives during the animation is ignored.
+#
+# Typical transcript: FILE_MENU 8.3, VEHICLE_CLASS_SELECT 9.3, PILOT_SELECT
+# 11.3, TEST_OVERVIEW 13.3, TEST_DETAILS 15.3, TEST_SETUP 17.3, TEST_UPDATE 17.4,
+# RESULTS about 55.
 
 # Title -> file menu -> (first file) -> vehicle class select -> pilot select
 #   -> test overview -> test details -> flight. A accepts on every one of them.
@@ -19,20 +23,10 @@
 11.0   11.3  A
 13.0   13.3  A
 15.0   15.3  A
-17.0   17.3  A
+17.0   17.3  A              # "Start" on the briefing
 19.0   19.3  A
-21.0   21.3  A
-23.0   23.3  A
-25.0   25.3  A
-27.0   27.3  A
-29.0   29.3  A
-31.0   31.3  A
-33.0   33.3  A
-35.0   35.3  A                # "Start" on the briefing
-37.0   37.3  A
-39.0   39.3  A
 
 # Flying: bank gently each way, then pull back.
-50.0   58.0  -       30   0  # bank right
-60.0   68.0  -      -30   0  # bank left
-70.0   76.0  -        0  40  # pitch
+26.0   34.0  -       30   0  # bank right
+36.0   44.0  -      -30   0  # bank left
+46.0   52.0  -        0  40  # pitch

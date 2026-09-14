@@ -1,0 +1,19 @@
+# Drive the port from boot into a Gyrocopter test (Beginner class), without a
+# pad. Format: see flight.txt; the vehicle grid is explained in rocketbelt.txt.
+
+4.0    4.3   START          # title
+7.0    7.3   A
+9.0    9.3   A              # file menu -> vehicle class select (~9.3)
+10.0   10.2  -       80   0  # right: Rocket Belt
+10.5   10.7  -       80   0  # right: Gyrocopter
+11.0   11.3  A
+13.0   13.3  A
+15.0   15.3  A
+17.0   17.3  A
+19.0   19.3  A
+21.0   21.3  A
+
+# Flying: throttle (A) the whole time, banking each way.
+22.0   54.0  A
+30.0   36.0  A      30   0
+40.0   46.0  A     -30   0

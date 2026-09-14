@@ -8,7 +8,10 @@
 // 2D stays a 4:3 box in the middle of the picture however wide the pass
 // behind it is. So:
 //
-// 1. The border is not drawn (drawScreenBorder).
+// 1. The border is not drawn (uvVtxRect). drawScreenBorder draws it for most
+//    screens, but the vehicle select and options screens draw their own copy
+//    inline, so it is the four rectangles that are dropped, wherever they come
+//    from.
 // 2. A channel given the inset viewport gets the whole frame instead
 //    (uvChan_80204D94), which is what lets RT64 widen it.
 // 3. Every frustum shaped for the inset viewport -- the game uses one aspect,
@@ -91,9 +94,162 @@ static s32 widenedClipRatio(s32 ratio) {
 // Which channels were given the whole frame in place of the inset viewport.
 static u8 sChannelExpanded[2];
 
-RECOMP_PATCH void drawScreenBorder(void) {
-    // The border existed to be hidden by a CRT; the picture now reaches the edges.
+// Whether (x0, y0)-(x1, y1), in uvVtxRect's y-up coordinates, is one of the four
+// rectangles of the screen border (drawScreenBorder in app/code_D2B10.c).
+static s32 isBorderRect(s32 x0, s32 y0, s32 x1, s32 y1) {
+    return (x0 == 0 && y0 == SUBSCREEN_Y0 && x1 == SCREEN_WIDTH - 1 && y1 == 0) ||
+           (x0 == 0 && y0 == SCREEN_HEIGHT - 1 && x1 == SCREEN_WIDTH - 1 && y1 == SUBSCREEN_Y1) ||
+           (x0 == 0 && y0 == SUBSCREEN_Y1 && x1 == SUBSCREEN_X0 && y1 == SUBSCREEN_Y0) ||
+           (x0 == SUBSCREEN_X1 && y0 == SUBSCREEN_Y1 && x1 == SCREEN_WIDTH - 1 && y1 == SUBSCREEN_Y0);
 }
+
+extern Vtx* gGeomVertexPtrs;
+extern s16 gGeomVertexCount;
+extern s16 gGeomFirstPoly;
+extern s16 gGfxViewX0;
+extern s16 gGfxViewX1;
+extern s16 gGfxViewY0;
+extern s16 gGfxViewY1;
+
+// If the polygon being ended is a quad over exactly the 320x240 screen -- how
+// the menus and the results screen darken the picture behind them -- stretches
+// it over the widened frame, under a scissor to match, and returns TRUE. The
+// scissor is put back to the viewport's by the caller once it has drawn.
+static s32 widenScreenQuad(void) {
+    Vtx* v = &gGeomVertexPtrs[gGeomFirstPoly];
+    s32 i;
+    s32 margin;
+    s32 seenLeft = FALSE;
+    s32 seenRight = FALSE;
+    f32 widen;
+
+    if (gGeomVertexCount - gGeomFirstPoly != 4) {
+        return FALSE;
+    }
+    for (i = 0; i < 4; i++) {
+        if (v[i].v.ob[2] != 0 || (v[i].v.ob[1] != 0 && v[i].v.ob[1] != SCREEN_HEIGHT)) {
+            return FALSE;
+        }
+        if (v[i].v.ob[0] == 0) {
+            seenLeft = TRUE;
+        } else if (v[i].v.ob[0] == SCREEN_WIDTH) {
+            seenRight = TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+    widen = pw64_widescreen_factor();
+    if (!seenLeft || !seenRight || widen <= 1.0f) {
+        return FALSE;
+    }
+
+    // Half the extra width on each side, and a pixel over.
+    margin = (s32)(SCREEN_WIDTH / 2 * (widen - 1.0f)) + 2;
+    for (i = 0; i < 4; i++) {
+        v[i].v.ob[0] = (v[i].v.ob[0] == 0) ? -margin : SCREEN_WIDTH + margin;
+    }
+    gEXSetScissorWideFrame(gGfxDisplayListHead++);
+    return TRUE;
+}
+
+// The decompilation's uvVtxEndPoly (src/kernel/geometry.c), with screen quads
+// widened (widenScreenQuad).
+RECOMP_PATCH void uvVtxEndPoly(void) {
+    s16 var_a2;
+    s16 var_t4;
+    s16 var_t5;
+    s16 var_v0;
+    s16 i;
+    s32 widened;
+
+    var_t4 = gGeomVertexCount - gGeomFirstPoly;
+    var_t5 = gGeomFirstPoly;
+    if (var_t4 < 3) {
+        _uvDebugPrintf("uvVtxEndPoly: not enough vertices\n");
+        return;
+    }
+    widened = widenScreenQuad();
+
+    while (var_t4 > 0) {
+        if (var_t5 == gGeomFirstPoly) {
+            if (var_t4 < 16) {
+                var_v0 = var_t4;
+            } else {
+                var_v0 = 16;
+            }
+            gSPVertex(gGfxDisplayListHead++, OS_PHYSICAL_TO_K0(&gGeomVertexPtrs[var_t5]), var_v0, 0);
+            var_a2 = var_v0 - 2;
+        } else {
+            if (var_t4 >= 15) {
+                var_v0 = 15;
+                gSPVertex(gGfxDisplayListHead++, OS_PHYSICAL_TO_K0(&gGeomVertexPtrs[var_t5]), 14, 1);
+                gSP1Triangle(gGfxDisplayListHead++, 0, 15, 1, 0);
+                gSPVertex(gGfxDisplayListHead++, (((u32)(&gGeomVertexPtrs[var_t5]) + 0x80000000)) + 14 * sizeof(Vtx), 1, 15);
+            } else {
+                var_v0 = var_t4;
+                gSPVertex(gGfxDisplayListHead++, OS_PHYSICAL_TO_K0(&gGeomVertexPtrs[var_t5]), var_v0, 1);
+                gSP1Triangle(gGfxDisplayListHead++, 0, 15, 1, 0);
+            }
+            var_a2 = var_v0 - 1;
+        }
+        var_t5 += var_v0;
+        var_t4 -= var_v0;
+        for (i = 0; i < var_a2; i++) {
+            gSP1Triangle(gGfxDisplayListHead++, 0, i + 1, i + 2, 0);
+        }
+    }
+
+    if (widened) {
+        // uvGfxViewport's scissor for the current viewport.
+        gDPSetScissor(gGfxDisplayListHead++, G_SC_NON_INTERLACE, gGfxViewX0, SCREEN_HEIGHT - gGfxViewY1, gGfxViewX1,
+                      SCREEN_HEIGHT - gGfxViewY0);
+    }
+}
+
+// geometry.c emits its texture rectangles with these two opcodes one lower than
+// gbi.h has them (the game's older Fast3D microcode), so the patch must too.
+#pragma push_macro("G_RDPHALF_1")
+#pragma push_macro("G_RDPHALF_2")
+#undef G_RDPHALF_1
+#undef G_RDPHALF_2
+#define G_RDPHALF_1 (G_IMMFIRST - 12)
+#define G_RDPHALF_2 (G_IMMFIRST - 13)
+
+// The decompilation's uvVtxRect (src/kernel/geometry.c), minus the border: it
+// existed to be hidden by a CRT, and the picture now reaches the edges.
+RECOMP_PATCH void uvVtxRect(s32 x0, s32 y0, s32 x1, s32 y1) {
+    if (isBorderRect(x0, y0, x1, y1)) {
+        return;
+    }
+    if (x0 < 0) {
+        x0 = 0;
+    } else if (x0 > SCREEN_WIDTH) {
+        x0 = SCREEN_WIDTH;
+    }
+    if (x1 < 0) {
+        x1 = 0;
+    } else if (x1 > SCREEN_WIDTH) {
+        x1 = SCREEN_WIDTH;
+    }
+    if (y0 < 0) {
+        y0 = 0;
+    } else if (y0 > SCREEN_HEIGHT) {
+        y0 = SCREEN_HEIGHT;
+    }
+    if (y1 < 0) {
+        y1 = 0;
+    } else if (y1 > SCREEN_HEIGHT) {
+        y1 = SCREEN_HEIGHT;
+    }
+    gDPPipeSync(gGfxDisplayListHead++);
+    gDPSetRenderMode(gGfxDisplayListHead++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+    gDPPipeSync(gGfxDisplayListHead++);
+    gSPTextureRectangle(gGfxDisplayListHead++, x0 << 2, (SCREEN_HEIGHT - y0) << 2, x1 << 2, (SCREEN_HEIGHT - y1) << 2, 1, 0, 0, 0x20, 0x20);
+    gDPPipeSync(gGfxDisplayListHead++);
+}
+
+#pragma pop_macro("G_RDPHALF_1")
+#pragma pop_macro("G_RDPHALF_2")
 
 RECOMP_PATCH void uvChan_80204D94(s32 vpId, s32 x0, s32 x1, s32 y0, s32 y1) {
     UnkStruct_80204D94* chan = &D_80261730[vpId];

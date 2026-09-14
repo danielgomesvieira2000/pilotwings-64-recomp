@@ -1,0 +1,22 @@
+# Drive the port from boot into a Rocket Belt test (Beginner class), without a
+# pad. Format: see flight.txt.
+#
+# The vehicle class select screen is a grid, vehicles across (Hang Glider,
+# Rocket Belt, Gyrocopter) and classes down; one push of the stick to the right
+# moves from the Hang Glider to the Rocket Belt (level_select.c, func_8030EA54).
+
+4.0    4.3   START          # title
+7.0    7.3   A
+9.0    9.3   A              # file menu -> vehicle class select (~9.3)
+10.2   10.5  -       80   0  # right: Rocket Belt
+11.0   11.3  A
+13.0   13.3  A
+15.0   15.3  A
+17.0   17.3  A
+19.0   19.3  A
+21.0   21.3  A
+
+# Flying: thrust (A), then drift with the stick.
+24.0   30.0  A
+32.0   38.0  A      30   0
+40.0   46.0  A     -30  20

@@ -86,4 +86,15 @@ void pw64_debug(u32 tag, s32 a, s32 b, s32 c);
 // PW64_NO_INTERP_TAGS is set, which is for measuring RT64 without them.
 s32 pw64_interp_tags_enabled(void);
 
+// Delivers a pending runtime event, if there is one, and switches to any
+// higher-priority game thread that is ready: what preemption would do at this
+// point on the N64. See patches/clocks.c.
+void pw64_poll_threads(void);
+
+// A profiling mark, when PW64_PATCH_DEBUG is set: the time since the previous
+// mark (of any tag) is charged to this tag (0-15), and the average per tag is
+// printed every two seconds, or at once on tag 0. For finding where a slow loop
+// spends its time.
+void pw64_profile_mark(u32 tag);
+
 #endif

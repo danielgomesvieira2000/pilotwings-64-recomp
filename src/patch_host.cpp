@@ -132,6 +132,52 @@ void pw64_debug(uint8_t* rdram, recomp_context* ctx) {
                  static_cast<int32_t>(ctx->r7));
 }
 
+// See pw64_poll_threads in patches/patches.h. A zero timeout makes the wait a
+// poll: at most one event is taken off the runtime's queue.
+void pw64_poll_threads(uint8_t* rdram, recomp_context* ctx) {
+    (void)ctx;
+    ultramodern::wait_for_external_message_timed(rdram, 0);
+    ultramodern::check_running_queue(rdram);
+}
+
+// See pw64_profile_mark in patches/patches.h.
+void pw64_profile_mark(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    using clock = std::chrono::steady_clock;
+    static const bool enabled = std::getenv("PW64_PATCH_DEBUG") != nullptr;
+    if (!enabled) {
+        return;
+    }
+
+    constexpr int kTags = 16;
+    static clock::time_point last = clock::now();
+    static clock::time_point report = clock::now();
+    static double seconds[kTags] = {};
+    static uint32_t counts[kTags] = {};
+
+    const auto now = clock::now();
+    const uint32_t tag = static_cast<uint32_t>(ctx->r4) % kTags;
+    seconds[tag] += std::chrono::duration<double>(now - last).count();
+    counts[tag]++;
+    last = now;
+
+    // Tag 0 reports at once, for a mark at the end of what is being measured.
+    if (tag != 0 && now - report < std::chrono::seconds(2)) {
+        return;
+    }
+    report = now;
+    std::fprintf(stderr, "[pw64-profile]");
+    for (int i = 0; i < kTags; i++) {
+        if (counts[i] != 0) {
+            std::fprintf(stderr, " %d: %u x %.2f ms;", i, counts[i], seconds[i] * 1000.0 / counts[i]);
+        }
+        seconds[i] = 0.0;
+        counts[i] = 0;
+    }
+    std::fprintf(stderr, "\n");
+    std::fflush(stderr);
+}
+
 // See pw64_interp_tags_enabled in patches/patches.h.
 void pw64_interp_tags_enabled(uint8_t* rdram, recomp_context* ctx) {
     (void)rdram;
