@@ -175,7 +175,10 @@ channel's 2D callbacks.
   `G_RDPHALF_2` redefined one lower than `gbi.h` (geometry.c).
 - **Polygons.** `uvVtxBeginPoly`/`uvVtx`/`uvVtxEndPoly` build fans from the
   vertex buffer `gGeomVertexPtrs`. The menus and results dim the screen with one
-  translucent black quad at exactly (0, 0)-(320, 240).
+  translucent black quad at exactly (0, 0)-(320, 240); the fade on leaving a
+  screen (`func_8032D51C`, over several frames that draw nothing else, after
+  `uvCopyFrameBuf`) uses (9, 17)-(311, 233), and the crash fades the inset
+  exactly.
 - **Text.** `uvFontPrintStr`/`uvFontPrintStr16` queue messages;
   `uvFontGenDlist` turns the queue into sprite display lists once per frame. Its
   display-list cursor is reset once per frame and advanced by the message count,

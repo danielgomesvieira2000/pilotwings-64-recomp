@@ -111,44 +111,65 @@ extern s16 gGfxViewX1;
 extern s16 gGfxViewY0;
 extern s16 gGfxViewY1;
 
-// If the polygon being ended is a quad over exactly the 320x240 screen -- how
-// the menus and the results screen darken the picture behind them -- stretches
-// it over the widened frame, under a scissor to match, and returns TRUE. The
-// scissor is put back to the viewport's by the caller once it has drawn.
+// Which edge of the screen a coordinate of a screen-covering quad is: -1 for the
+// low edge, 1 for the high edge, 0 for neither. A quad covers the screen at
+// exactly its edges (the menus' and results' dimming), at the inset viewport's
+// (the crash fades), or a pixel outside the inset's (the fade on leaving a
+// screen, func_8032D51C).
+static s32 screenEdge(s32 c, s32 size, s32 insetLow, s32 insetHigh) {
+    if (c == 0 || c == insetLow || c == insetLow - 1) {
+        return -1;
+    }
+    if (c == size || c == insetHigh || c == insetHigh + 1) {
+        return 1;
+    }
+    return 0;
+}
+
+// If the polygon being ended is a quad covering the screen -- how the game dims
+// the picture behind a menu and fades between screens -- stretches it over the
+// whole widened frame, under a scissor to match, and returns TRUE. A quad made
+// for the inset viewport is also taken to the top and bottom of the frame, where
+// the border used to hide what it left uncovered. The scissor is put back to the
+// viewport's by the caller once it has drawn.
 static s32 widenScreenQuad(void) {
     Vtx* v = &gGeomVertexPtrs[gGeomFirstPoly];
     s32 i;
     s32 margin;
-    s32 seenLeft = FALSE;
-    s32 seenRight = FALSE;
+    s32 seen = 0;
     f32 widen;
 
     if (gGeomVertexCount - gGeomFirstPoly != 4) {
         return FALSE;
     }
     for (i = 0; i < 4; i++) {
-        if (v[i].v.ob[2] != 0 || (v[i].v.ob[1] != 0 && v[i].v.ob[1] != SCREEN_HEIGHT)) {
+        s32 ex = screenEdge(v[i].v.ob[0], SCREEN_WIDTH, SUBSCREEN_X0, SUBSCREEN_X1);
+        s32 ey = screenEdge(v[i].v.ob[1], SCREEN_HEIGHT, SUBSCREEN_Y0, SUBSCREEN_Y1);
+        if (v[i].v.ob[2] != 0 || ex == 0 || ey == 0) {
             return FALSE;
         }
-        if (v[i].v.ob[0] == 0) {
-            seenLeft = TRUE;
-        } else if (v[i].v.ob[0] == SCREEN_WIDTH) {
-            seenRight = TRUE;
-        } else {
-            return FALSE;
-        }
+        // One bit per corner: all four must be present.
+        seen |= 1 << ((ex > 0) * 2 + (ey > 0));
     }
-    widen = pw64_widescreen_factor();
-    if (!seenLeft || !seenRight || widen <= 1.0f) {
+    if (seen != 0xF) {
         return FALSE;
     }
 
     // Half the extra width on each side, and a pixel over.
-    margin = (s32)(SCREEN_WIDTH / 2 * (widen - 1.0f)) + 2;
+    widen = pw64_widescreen_factor();
+    margin = (widen > 1.0f) ? (s32)(SCREEN_WIDTH / 2 * (widen - 1.0f)) + 2 : 0;
     for (i = 0; i < 4; i++) {
-        v[i].v.ob[0] = (v[i].v.ob[0] == 0) ? -margin : SCREEN_WIDTH + margin;
+        s32 ex = screenEdge(v[i].v.ob[0], SCREEN_WIDTH, SUBSCREEN_X0, SUBSCREEN_X1);
+        s32 ey = screenEdge(v[i].v.ob[1], SCREEN_HEIGHT, SUBSCREEN_Y0, SUBSCREEN_Y1);
+        v[i].v.ob[0] = (ex < 0) ? -margin : SCREEN_WIDTH + margin;
+        v[i].v.ob[1] = (ey < 0) ? 0 : SCREEN_HEIGHT;
     }
     gEXSetScissorWideFrame(gGfxDisplayListHead++);
+    // The clip ratio a channel draw leaves (see uvChan_80204FE4 below). A frame
+    // that draws no channel -- the fade on leaving a screen is one -- would still
+    // have the microcode's default of 1, which clips the quad at the 4:3 edges.
+    // Every channel draw sets its own ratio first, so this can stay.
+    clipRatio(widenedClipRatio(2));
     return TRUE;
 }
 

@@ -260,10 +260,13 @@ Clamp16x9, none at Original.
   reset once per frame and advanced by message count: a second flush overwrote
   the first one's display lists and **digits vanished**. The patched function
   continues the cursor across flushes.
-- **Full-screen quads** -- the menus' and results' dimming, the Sky Diving cloud
-  fade, `hudDrawBox`, the camera shutter -- are stretched over the widened frame
-  under a wide scissor. The dimming is caught generically in `uvVtxEndPoly`: a
-  four-vertex polygon at exactly (0, 0)-(320, 240).
+- **Full-screen quads** -- the menus' and results' dimming, the fades between
+  screens and on a crash, the Sky Diving cloud fade, `hudDrawBox`, the camera
+  shutter -- are stretched over the widened frame under a wide scissor. Most are
+  caught generically in `uvVtxEndPoly`: a four-vertex polygon covering the
+  screen, the inset viewport, or a pixel more than the inset. **It also sets the
+  clip ratio**: a fade frame draws no channel, and at the default ratio of 1 the
+  stretched quad is clipped straight back to 4:3.
 - Cannonball's HUD is left centred: its gauges and target bar span the 4:3
   screen and read as one instrument.
 

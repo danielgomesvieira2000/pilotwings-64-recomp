@@ -15,8 +15,8 @@ The game, recompiled and running natively, with the first two enhancements.
   field of view; the overscan border is removed; culling and clipping are
   widened so the edges are drawn; the sky and sea reach the sides. Each
   vehicle's HUD is anchored to the frame's edges, following the HUD Placement
-  setting (Full, 16:9, Original). Menu and results dimming covers the widened
-  frame.
+  setting (Full, 16:9, Original). Menu and results dimming and the fades between
+  screens cover the widened frame.
 - **High frame rate.** Every 3D transform is tagged with a matrix group so RT64
   interpolates it by identity: cameras, dynamic and static objects, the terrain,
   the environment and effects. Camera cuts start a new generation of ids, so
@@ -33,7 +33,5 @@ The game, recompiled and running natively, with the first two enhancements.
 
 Known issues:
 
-- One transition frame between the file menu and the vehicle select shows its
-  fade as a 4:3 box.
 - The photo album and the options screen have not been checked in widescreen.
 - Built and tested on Windows only.

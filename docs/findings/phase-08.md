@@ -163,10 +163,21 @@ wide scissor, and restores the viewport's scissor after.
   writes the new record to disk.
 - A crash ends in the game's own fade to white, then the results screen.
 
-### Open
+### Fades that stopped at 4:3
 
-- One transition frame, between the file menu and vehicle select, shows the
-  dimming as a 4:3 box: a fade drawn with other coordinates.
+The fade on leaving a screen (`func_8032D51C`) still darkened only the middle
+4:3. Its quad is a pixel outside the inset viewport, (9, 17)-(311, 233), not the
+screen; the crash fades use the inset exactly. `uvVtxEndPoly` now takes all
+three shapes to the whole widened frame, top and bottom included, where the
+border used to hide the strips an inset quad leaves.
+
+Widened, the fade was *still* 4:3. The frames of that fade draw no channel, so
+the clip ratio was still the microcode's default of 1, which clips the stretched
+quad back to the 4:3 edges -- the full-screen quads in the HUD had only worked
+because a channel draw earlier in the frame had raised it. The patch sets the
+same ratio a channel draw leaves.
+
+### Open
 - The photo album (reached from results with photographs taken) and the
   options screen have not been looked at in widescreen.
 - Interpolation has been verified with the game slowed to 20; it has not been
