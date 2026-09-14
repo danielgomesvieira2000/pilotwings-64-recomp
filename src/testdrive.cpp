@@ -241,6 +241,24 @@ uint16_t read_half(uint32_t vaddr) {
     return *reinterpret_cast<const uint16_t*>(g_rdram + ((vaddr ^ 2u) & 0x00FFFFFFu));
 }
 
+void write_half(uint32_t vaddr, uint16_t value) {
+    *reinterpret_cast<uint16_t*>(g_rdram + ((vaddr ^ 2u) & 0x00FFFFFFu)) = value;
+}
+
+constexpr uint32_t kStatePilotSelect = 3;
+
+// Test knob: PW64_TEST_VEHICLE=<VehicleId> puts the player in that vehicle while
+// the pilot select screen is up, so a script that picks the first Hang Glider
+// test runs the first Beginner test of any vehicle instead -- including the
+// bonus ones, which a fresh save has not unlocked. -1 when not set.
+int test_vehicle() {
+    static const int vehicle = [] {
+        const char* value = std::getenv("PW64_TEST_VEHICLE");
+        return value != nullptr ? std::atoi(value) : -1;
+    }();
+    return vehicle;
+}
+
 }  // namespace
 
 void set_rdram_base(uint8_t* rdram) {
@@ -261,6 +279,9 @@ void poll_game_state() {
     static uint32_t last_map = 0xFFFFFFFFu;
 
     const uint32_t state = read_word(kGameState);
+    if (state == kStatePilotSelect && test_vehicle() >= 0) {
+        write_half(kGameVehicle, static_cast<uint16_t>(test_vehicle()));
+    }
     const uint32_t vehicle = read_half(kGameVehicle);
     const uint32_t map = read_half(kGameMap);
     if (state == last_state && vehicle == last_vehicle && map == last_map) {
