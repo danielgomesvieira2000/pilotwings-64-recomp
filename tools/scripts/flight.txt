@@ -1,0 +1,38 @@
+# Drive the port from boot into a Hang Glider test, without a pad.
+#
+# Times are seconds since the game's first input poll. Each line is
+#
+#     <start> <end> <buttons> [stick_x stick_y] [# note]
+#
+# with the stick in the N64's own range (about +/-80), and lines overlap freely.
+# See src/testdrive.cpp. The port's stderr transcript names each game state as
+# it is entered, which is what tells you which press landed.
+#
+# The presses are repeated on purpose: menus animate in before they accept
+# input, and a press that arrives during the animation is ignored.
+
+# Title -> file menu -> (first file) -> vehicle class select -> pilot select
+#   -> test overview -> test details -> flight. A accepts on every one of them.
+4.0    4.3   START          # title
+7.0    7.3   A
+9.0    9.3   A
+11.0   11.3  A
+13.0   13.3  A
+15.0   15.3  A
+17.0   17.3  A
+19.0   19.3  A
+21.0   21.3  A
+23.0   23.3  A
+25.0   25.3  A
+27.0   27.3  A
+29.0   29.3  A
+31.0   31.3  A
+33.0   33.3  A
+35.0   35.3  A                # "Start" on the briefing
+37.0   37.3  A
+39.0   39.3  A
+
+# Flying: bank gently each way, then pull back.
+50.0   58.0  -       30   0  # bank right
+60.0   68.0  -      -30   0  # bank left
+70.0   76.0  -        0  40  # pitch

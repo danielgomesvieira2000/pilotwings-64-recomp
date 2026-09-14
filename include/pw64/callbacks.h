@@ -40,4 +40,9 @@ void register_sections();
 void place_resident_sections(uint32_t entrypoint);
 size_t code_section_count();
 
+// Defined in src/register_patches.cpp: the recompiled C patches and their data.
+void register_patches();
+// Maps each patch at the address of the function it replaces. Call from on_init.
+void register_patched_addresses();
+
 }  // namespace pw64

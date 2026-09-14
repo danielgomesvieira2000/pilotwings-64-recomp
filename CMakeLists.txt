@@ -273,7 +273,27 @@ set(PW64_SOURCES src/main.cpp src/rom.cpp src/crash_handler.cpp)
 # sections.cpp cannot even compile without recomp_overlays.inl.
 if(PW64_WITH_RUNTIME AND PW64_WITH_RECOMPILED)
     list(APPEND PW64_SOURCES src/renderer.cpp src/callbacks.cpp src/sections.cpp src/libultra_stubs.cpp
-                             src/testdrive.cpp src/audiodiag.cpp src/resample.cpp)
+                             src/testdrive.cpp src/audiodiag.cpp src/resample.cpp
+                             src/register_patches.cpp src/patch_host.cpp)
+
+    # The recompiled C patches (tools/build_patches.py). Compiled into the
+    # executable itself rather than into a library: a patch replaces the game's
+    # function of the same name by being its strong definition, and an archive
+    # member is only pulled into a link to satisfy an undefined symbol -- which
+    # the game's own weak definition already has. As objects they always link.
+    set(PW64_PATCH_C "${CMAKE_CURRENT_SOURCE_DIR}/RecompiledPatches/patches.c")
+    set(PW64_PATCH_BIN_C "${CMAKE_CURRENT_SOURCE_DIR}/RecompiledPatches/patches_bin.c")
+    if(NOT EXISTS "${PW64_PATCH_C}" OR NOT EXISTS "${PW64_PATCH_BIN_C}")
+        message(FATAL_ERROR
+            "RecompiledPatches/ is missing. Build the patches first: python tools/build_patches.py")
+    endif()
+    list(APPEND PW64_SOURCES "${PW64_PATCH_C}" "${PW64_PATCH_BIN_C}")
+    if(MSVC)
+        set_source_files_properties("${PW64_PATCH_C}" PROPERTIES COMPILE_OPTIONS "/w")
+    else()
+        set_source_files_properties("${PW64_PATCH_C}" PROPERTIES
+            COMPILE_OPTIONS "-fno-strict-aliasing;-fwrapv;-w")
+    endif()
     if(PW64_WITH_FRONTEND)
         list(APPEND PW64_SOURCES src/frontend.cpp)
     endif()

@@ -164,6 +164,7 @@ void on_init(uint8_t* rdram, recomp_context* ctx) {
     // which puts the app segment's functions in the wrong place. See
     // src/sections.cpp.
     pw64::place_resident_sections(pw64::kEntrypoint);
+    pw64::register_patched_addresses();
 
 }
 
@@ -296,6 +297,7 @@ int run(int argc, char** argv, const char* rom_arg) {
     // The generated section tables have to reach librecomp before anything can
     // resolve an address, so this comes first.
     pw64::register_sections();
+    pw64::register_patches();
 
     recomp::GameEntry game{};
     game.rom_hash = pw64::kRomHash;

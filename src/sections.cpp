@@ -31,7 +31,7 @@
 #include "librecomp/overlays.hpp"
 #include "librecomp/sections.h"
 
-#include "recomp_overlays.inl"
+#include "../RecompiledFuncs/recomp_overlays.inl"
 
 #include "pw64/callbacks.h"
 

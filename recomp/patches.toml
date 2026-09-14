@@ -1,0 +1,49 @@
+# N64Recomp config for the port's C patches (patches/*.c).
+#
+# The patch ELF is built by tools/build_patches.py. N64Recomp recompiles it into
+# one C file, resolving every call and data reference to the game by name against
+# the reference symbols the game's own recompile dumped (tools/recompile.sh), and
+# writes the patches' data as patches.bin for librecomp to load at 0x80801000.
+#
+# Paths are relative to this file.
+
+[input]
+elf_path = "../build/patches/patches.elf"
+output_func_path = "../RecompiledPatches"
+single_file_output = true
+
+# Host functions are placed at fixed addresses in patches/syms.ld; this lets the
+# recompiler treat those absolute symbols as call targets.
+use_absolute_symbols = true
+
+func_reference_syms_file = "../RecompiledFuncs/context/dump.toml"
+data_reference_syms_files = [ "../RecompiledFuncs/context/data_dump.toml" ]
+
+# The recompiler writes the loadable image itself, so it can patch the MIPS32
+# relocations objcopy would leave alone.
+output_binary_path = "../RecompiledPatches/patches.bin"
+
+# Clang emits many LO16 relocations without a matching HI16.
+unpaired_lo16_warnings = false
+
+allow_exports = true
+
+# A patch replaces the game's function of the same name at link time. The
+# recompiler emits both with RECOMP_FUNC, which under Clang is a *weak*
+# definition, and between two weak definitions the linker keeps whichever it
+# meets first -- so a patch would win or lose on link order. Patch definitions are
+# made strong instead (noinline keeps what RECOMP_FUNC's weak was there to keep:
+# no inlining across the call).
+#
+# The game's own declarations come in with it: a patch calls game functions,
+# and the patches' funcs.h declares only the patches.
+recomp_include = """#include "recomp.h"
+#include "../RecompiledFuncs/funcs.h"
+#include "../RecompiledFuncs/reimplemented_decls.h"
+#undef RECOMP_FUNC
+#define RECOMP_FUNC __attribute__((noinline))"""
+
+# Refuse a RECOMP_PATCH whose name matches no game function (a typo, or a
+# function renamed by a decompilation update), and a non-patch function that
+# accidentally shadows one.
+strict_patch_mode = true

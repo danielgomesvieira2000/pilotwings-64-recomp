@@ -304,11 +304,14 @@ recomp_include = """#include "recomp.h"
 [patches]
 stubs = []
 
-# Functions recompiled from patches/ instead (the port's C patches replace them
-# by name, see recomp/patches.toml) do not need to be listed here: a patch wins
-# over the original at load time. This list is for functions the port provides
-# in C++ and that must not be emitted at all.
-ignored = []
+# Game functions replaced by the port's C patches (patches/*.c). Their original
+# code is not emitted, so the patch is the only definition of the name: under
+# clang-cl the recompiler's weak definitions become COMDATs on PE/COFF, which a
+# second definition collides with instead of overriding. tools/build_patches.py
+# refuses to build if a RECOMP_PATCH is missing from this list.
+ignored = [
+    "_uvScDoneGfx",     # patches/framerate.c
+]
 
 # Three instructions touch hardware the runtime has no model of. Each is a nop
 # in the port; the reason it is safe is given beside it. These are the same
