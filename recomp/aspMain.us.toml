@@ -1,0 +1,38 @@
+# RSPRecomp config for Pilotwings 64's audio microcode.
+#
+# Graphics tasks go to RT64; what reaches the port's RSP callback is the audio
+# task, and it needs the cartridge's own microcode recompiled to run.
+#
+# aspMain is a textbin in the kernel segment: ROM 0x48E10 to 0x49C30 (0xE20
+# bytes) for the text, and its data at ROM 0x51B70, both named in the
+# decompilation's splat config.
+#
+# This microcode is byte-for-byte the one Wave Race 64 (USA, Rev A) ships --
+# the text is identical over all 0xE20 bytes and so is the sixteen-entry command
+# table in its data -- so everything Wave Race 64: Recompiled established about
+# it holds here unchanged, and was checked rather than assumed:
+#
+# - text_address is the IMEM address the microcode executes at. rspboot occupies
+#   the first 0x80 bytes of IMEM and loads the task's microcode after itself, so
+#   it is 0x04001080, not 0x04001000. At 0x1000 every jump lands 0x80 bytes early
+#   and the port freezes silently on the first audio task.
+# - The command handlers are reached through a table in the *data* segment
+#   (`lh $2, 0x10($2)`, then `jr $2`), which RSPRecomp cannot discover by walking
+#   the instructions, so they are listed below. Read from ROM 0x51B80..0x51B9F.
+
+rom_file_path = "../pilotwings64.us.z64"
+text_offset = 0x48E10
+text_size = 0xE20
+text_address = 0x04001080
+
+# C++, not C: the output includes librecomp's RSP headers. It also keeps it out
+# of the *.c glob that builds the recompiled game.
+output_file_path = "../RecompiledFuncs/aspMain_rsp.cpp"
+output_function_name = "aspMain_run"
+
+extra_indirect_branch_targets = [
+    0x1118, 0x1470, 0x11DC, 0x1B38,
+    0x1214, 0x187C, 0x1254, 0x12D0,
+    0x12EC, 0x1328, 0x140C, 0x1294,
+    0x1E24, 0x138C, 0x170C, 0x144C,
+]

@@ -1,0 +1,65 @@
+# ============================================================
+#  NO GAME DATA IN THIS REPOSITORY. EVER.
+#  Pilotwings 64 is Nintendo's. This project ships tooling and
+#  original code only; the user supplies their own ROM.
+# ============================================================
+*.z64
+*.n64
+*.v64
+*.rom
+baserom*
+*.elf
+*.o
+*.a
+*.bin
+*.sym
+*.map
+*.d
+
+# Recompiler output (regenerated from the user's ROM)
+/RecompiledFuncs/
+/RecompiledPatches/
+dump.toml
+data_dump.toml
+
+# Build. Any build*/ directory.
+/build*/
+/out/
+CMakeCache.txt
+CMakeFiles/
+CMakeUserPresets.json
+*.ninja
+.ninja_deps
+.ninja_log
+compile_commands.json
+
+# Tooling
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Editors / OS
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.user
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Release staging (tools/package_release.ps1)
+/dist/
+
+# Window captures from tools/capture_window.ps1 and tools/capture_frames.py.
+/shots/
+
+# Runtime output when the game is started from the repository root.
+/mods/
+/mod_config/
+/saves/
+/*.log
+
+# Claude Code worktrees.
+/.claude/

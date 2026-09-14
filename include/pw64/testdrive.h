@@ -1,0 +1,51 @@
+#pragma once
+
+#include <cstdint>
+
+// Verification: drive the game without a person holding the pad, and report
+// where it got to.
+//
+// Whether the menus work and a flight runs is not observable from outside the
+// process: a port that hangs on the title screen and one that is quietly flying
+// look identical from a terminal, and both look like a window that is up. Two
+// things fix that.
+//
+// A script of timed inputs replaces the pad, so a run is repeatable and can be
+// checked into the repository next to the thing it tests. Pressing keys at a
+// window by hand is neither.
+//
+// A watcher on the game's state turns the run into a transcript. The game keeps
+// its current screen in one word at a known address and the decompilation names
+// the values, so "title -> file menu -> pilot select -> test setup -> flying" is
+// a fact the log can state rather than something to infer from pixels.
+
+namespace pw64 {
+
+// Loads a script of timed inputs from the path in PW64_INPUT_SCRIPT, if set.
+// Returns false and explains itself on stderr if the file cannot be used, in
+// which case the pad and keyboard still work as usual.
+bool load_input_script();
+
+// The buttons and stick the script asks for at the current moment. Merged with
+// the pad and keyboard rather than replacing them, so a run can be nudged by
+// hand while it plays.
+void input_script_state(uint16_t* buttons, float* stick_x, float* stick_y);
+
+// The same for a given player: 0 is player one, 1 is player two. A script line
+// whose buttons carry a "2:" prefix ("2:A", "2:-") belongs to player two.
+void input_script_state(int player, uint16_t* buttons, float* stick_x, float* stick_y);
+
+// Whether the loaded script drives player two at all. When it does, the port
+// reports a second controller connected, so two-player modes can be reached
+// and verified without a second pad plugged in.
+bool input_script_has_player_two();
+
+// Reports every change of the game state, vehicle or map, by name. Called once per frame from the
+// main loop; needs the RDRAM base, which only the runtime hooks have.
+void set_rdram_base(uint8_t* rdram);
+void poll_game_state();
+
+// The game's state variable as it is right now, or 0 before RDRAM is known.
+uint32_t current_game_state();
+
+}  // namespace pw64
