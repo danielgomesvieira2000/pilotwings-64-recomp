@@ -1,0 +1,8 @@
+# From boot to the options screen, without a pad. Format: see flight.txt.
+#
+# The title's menu has Game Start and Options (title_screen.c: choice 1 is
+# GAME_STATE_OPTIONS); one push down selects Options.
+
+4.0    4.3   START          # title
+6.0    6.3   -        0 -80  # down: Options
+7.0    7.3   A

@@ -1,0 +1,12 @@
+# Into a Hang Glider flight, then the pause menu. Format: see flight.txt.
+
+4.0    4.3   START          # title
+7.0    7.3   A
+9.0    9.3   A
+11.0   11.3  A
+13.0   13.3  A
+15.0   15.3  A
+17.0   17.3  A              # "Start" on the briefing (flight from ~17.4)
+19.0   19.3  A
+
+24.0   24.3  START          # pause

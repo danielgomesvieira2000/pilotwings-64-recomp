@@ -33,5 +33,5 @@ The game, recompiled and running natively, with the first two enhancements.
 
 Known issues:
 
-- The photo album and the options screen have not been checked in widescreen.
+- The photo album has not been checked in widescreen.
 - Built and tested on Windows only.

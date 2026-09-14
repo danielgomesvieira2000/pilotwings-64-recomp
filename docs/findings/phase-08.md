@@ -97,7 +97,7 @@ shows the terrain's far edges very slightly off an ideal arc.
 
 ## Everything else testing turned up
 
-Testing every mode (the plan's phase 04 and 07 gates) found three problems that
+Testing every mode (the plan's phase 04 and 07 gates) found four problems that
 had nothing to do with interpolation.
 
 ### A six-second stall on every music change
@@ -178,7 +178,9 @@ because a channel draw earlier in the frame had raised it. The patch sets the
 same ratio a channel draw leaves.
 
 ### Open
-- The photo album (reached from results with photographs taken) and the
-  options screen have not been looked at in widescreen.
+- The photo album (reached from results with photographs taken, or from the
+  options screen with an album saved) has not been looked at in widescreen. The
+  options screen itself and the pause menu have (`tools/scripts/options.txt`,
+  `pause.txt`), and are right.
 - Interpolation has been verified with the game slowed to 20; it has not been
   watched on a real 120 Hz or faster display.

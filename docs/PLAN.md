@@ -24,8 +24,7 @@ the findings goes in [PORTING.md](PORTING.md) (port facts) and
 > - *Phases 05 and 06* have no findings document of their own: the harness,
 >   audio path and frontend came from Wave Race 64: Recompiled and worked on the
 >   first run; what changed is in [findings/phase-00-04.md](findings/phase-00-04.md).
-> - The pause menu, the photo album and the options screen have not been checked
->   in widescreen.
+> - The photo album has not been checked in widescreen.
 
 ## Goal
 
