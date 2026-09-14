@@ -65,8 +65,10 @@ RECOMP_PATCH void uvGfxClearScreen(u8 r, u8 g, u8 b, u8 a) {
     gDPSetColorImage(gGfxDisplayListHead++, G_IM_FMT_RGBA, G_IM_SIZ_16b, SCREEN_WIDTH, osVirtualToPhysical(gGfxFbCurrPtr));
     gDPSetFillColor(gGfxDisplayListHead++, GPACK_RGBA5551(r, g, b, a) << 16 | GPACK_RGBA5551(r, g, b, a));
     if (fullFrame) {
-        gEXSetScissor(gGfxDisplayListHead++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        gEXFillRectangle(gGfxDisplayListHead++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+        // Both measured from their own edge: 0 under RIGHT is the right edge
+        // (see gEXSetScissorWideFrame in patches.h).
+        gEXSetScissorWideFrame(gGfxDisplayListHead++);
+        gEXFillRectangle(gGfxDisplayListHead++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, SCREEN_HEIGHT - 1);
     } else {
         gDPFillRectangle(gGfxDisplayListHead++, gGfxViewX0, (SCREEN_HEIGHT - gGfxViewY1), (gGfxViewX1 - 1), (SCREEN_HEIGHT - 1 - gGfxViewY0));
     }

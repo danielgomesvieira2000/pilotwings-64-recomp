@@ -44,6 +44,19 @@
     )
 #endif
 
+// A scissor over the whole widened frame, from its left edge to its right edge.
+//
+// Under an extended origin, RT64 measures a coordinate from that origin's edge
+// of the game's 320-wide screen: RIGHT adds 320 pixels (RDP::movedFromOrigin). So
+// the right edge of the frame is 0 under G_EX_ORIGIN_RIGHT, not SCREEN_WIDTH.
+// Getting that wrong is not merely a wider scissor: RT64 merges every scissor of
+// a frame and treats the frame as the game's 4:3 picture only if the merged
+// shape is 4:3 (rt64_framebuffer_renderer.cpp, adjustRatio), and a scissor
+// reaching 640 pixels switches that off for the whole frame -- every 2D
+// rectangle is then stretched across the widened frame instead of kept at 4:3.
+#define gEXSetScissorWideFrame(cmd) \
+    gEXSetScissor(cmd, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, SCREEN_HEIGHT)
+
 // ---- Host functions: implemented by the port in C++ (src/patch_host.cpp) ----
 //
 // Each has an address in patches/syms.ld between 0x8F000000 and 0x90000000,
@@ -58,5 +71,11 @@ void pw64_frame_presented(void);
 // 4:3 when Aspect Ratio is Expand, and 1 otherwise (or for a window narrower
 // than 4:3, where RT64 does not narrow the view).
 f32 pw64_widescreen_factor(void);
+
+// How far, in the game's 320x240 pixels, a HUD element at the side of the 4:3
+// screen moves towards that edge of the widened frame: half the extra width,
+// scaled by the HUD Placement setting (none at Original, all of it at Full,
+// part of it for 16:9) the way RT64 scales its own extended origins.
+f32 pw64_hud_margin(void);
 
 #endif

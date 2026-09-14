@@ -47,6 +47,15 @@ ignored = [
     "uvChan_80204C94",  # patches/widescreen.c
     "uvChan_80204D94",  # patches/widescreen.c
     "uvChan_80204FE4",  # patches/widescreen.c
+    "hudDrawHangGlider",  # patches/hud.c
+    "hudDrawRocketPack",  # patches/hud.c
+    "hudDrawGyrocopter",  # patches/hud.c
+    "hudDrawSkyDiving",   # patches/hud.c
+    "hudDrawJumbleHopper",# patches/hud.c
+    "hudDrawBirdman",     # patches/hud.c
+    "hudDrawCamera",      # patches/hud.c
+    "hudDrawBox",         # patches/hud.c
+    "uvFontGenDlist",     # patches/hud.c
 ]
 
 # Three instructions touch hardware the runtime has no model of. Each is a nop

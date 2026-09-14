@@ -20,3 +20,4 @@ osVirtualToPhysical_recomp = 0x8F000018;
 /* The port's own, in src/patch_host.cpp. */
 pw64_frame_presented = 0x8F001000;
 pw64_widescreen_factor = 0x8F001004;
+pw64_hud_margin = 0x8F001008;

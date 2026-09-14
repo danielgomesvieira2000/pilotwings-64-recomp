@@ -79,4 +79,36 @@ void pw64_widescreen_factor(uint8_t* rdram, recomp_context* ctx) {
     ctx->f0.fl = factor;
 }
 
+// See pw64_hud_margin in patches/patches.h. This mirrors how RT64 turns the
+// HUD Placement setting into its extended-origin percentage
+// (rt64_workload_queue.cpp): Full is all of the widening, Clamp16x9 the part of
+// it up to 16:9, Original none.
+void pw64_hud_margin(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    const auto& config = ultramodern::renderer::get_graphics_config();
+    constexpr float kFourThirds = 4.0f / 3.0f;
+
+    float display = kFourThirds;
+    if (config.ar_option == ultramodern::renderer::AspectRatio::Expand) {
+        display = std::max(kFourThirds, pw64::window_aspect());
+    }
+
+    float percentage = 0.0f;
+    switch (config.hr_option) {
+        case ultramodern::renderer::HUDRatioMode::Full:
+            percentage = 1.0f;
+            break;
+        case ultramodern::renderer::HUDRatioMode::Clamp16x9:
+            if (display > kFourThirds) {
+                percentage = std::clamp((16.0f / 9.0f - kFourThirds) / (display - kFourThirds), 0.0f, 1.0f);
+            }
+            break;
+        default:
+            break;
+    }
+
+    const float widening = display / kFourThirds;
+    ctx->f0.fl = 160.0f * (widening - 1.0f) * percentage;
+}
+
 }  // extern "C"
