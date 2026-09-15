@@ -305,6 +305,10 @@ endif()
 if(WIN32)
     enable_language(RC)
     list(APPEND PW64_SOURCES src/app.rc)
+    # The resource compiler does not report the icon as a dependency, so a new
+    # icon would otherwise not reach the executable until app.rc itself changed.
+    set_source_files_properties(src/app.rc PROPERTIES
+        OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/assets/AppIcon.ico")
 endif()
 
 add_executable(Pilotwings64Recomp ${PW64_SOURCES})
