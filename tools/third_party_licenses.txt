@@ -1,6 +1,6 @@
 # Third-party license texts shipped in every release, in its licenses/ folder.
 # <name in the release> <TAB> <source, relative to the repository root>
-# Read by tools/package_release.ps1; see THIRD_PARTY_NOTICES.md.
+# Read by tools/package_release.ps1 and tools/package_release.py; see THIRD_PARTY_NOTICES.md.
 # A source that does not exist stops packaging, so a submodule update that moves a file is caught.
 Pilotwings64Decomp.txt	lib/Pilotwings64Decomp/LICENSE
 N64ModernRuntime-GPL-3.0.txt	lib/N64ModernRuntime/COPYING

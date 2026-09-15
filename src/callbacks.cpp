@@ -94,59 +94,6 @@ void refresh_primary_controller() {
     }
 }
 
-// Who is player one, and who is player two.
-//
-// The frontend's own answer is a modal: it opens, each player presses a button
-// on the pad they want, and the assignment is committed. That suits a game where
-// which pad is which matters. Here the first pad is player one and the second is
-// player two, and until someone had been through that modal nothing was assigned
-// at all -- so a pad drove the game, because the port read it directly, while
-// rumble did nothing, because rumble goes through the player list.
-//
-// So the pads are assigned here instead, in the order SDL reports them, whenever
-// that set changes: plug one in and it is player one, plug a second in and it is
-// player two. Two is the maximum, because the game's is (frontend.cpp). With no
-// pad at all the keyboard becomes player one, so the game is still playable.
-// tools/patch_recompinput.py adds the call; the modal still wins while it is
-// open, for anyone who wants to choose.
-void refresh_players() {
-    std::vector<SDL_GameController*> connected;
-    for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-        if (!SDL_IsGameController(i)) continue;
-        // Opening an already-open device returns the existing handle.
-        if (SDL_GameController* pad = SDL_GameControllerOpen(i)) {
-            connected.push_back(pad);
-        }
-    }
-
-    // The first call always assigns, even with nothing connected. Comparing
-    // against the last set alone is what broke input entirely on a machine with
-    // no pad attached: an empty set matched an empty set, so nothing was ever
-    // assigned, player one did not exist, and get_input reported no controller
-    // to the game at all -- keyboard included.
-    static bool assigned_once = false;
-    static std::vector<SDL_GameController*> assigned;
-    if (assigned_once && connected == assigned) {
-        return;
-    }
-    assigned_once = true;
-    assigned = connected;
-
-    recompinput::players::auto_assign_controllers(connected.data(), connected.size());
-
-    // Both of player one's profiles, because a keyboard that does nothing looks
-    // the same whether it is unbound, unassigned, or simply on other keys.
-    std::fprintf(stderr, "[pw64] player 1 profiles: controller %d, keyboard %d\n",
-                 recompinput::profiles::get_input_profile_for_player(
-                     0, recompinput::InputDevice::Controller),
-                 recompinput::profiles::get_input_profile_for_player(
-                     0, recompinput::InputDevice::Keyboard));
-    std::fprintf(stderr, "[pw64] %zu controller%s connected; assigned to %zu player%s\n",
-                 connected.size(), connected.size() == 1 ? "" : "s",
-                 recompinput::players::get_number_of_assigned_players(),
-                 recompinput::players::get_number_of_assigned_players() == 1 ? "" : "s");
-    std::fflush(stderr);
-}
 #endif
 
 void poll_input() {
@@ -189,7 +136,6 @@ void poll_input() {
     recompinput::poll_inputs();
 
     refresh_primary_controller();
-    refresh_players();
 #else
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -264,24 +210,17 @@ float axis_to_n64(Sint16 value) {
 
 bool get_input(int controller_num, uint16_t* buttons, float* x, float* y) {
 #if PW64_WITH_FRONTEND
-    // Both players' pads are read through the frontend rather than from SDL
-    // here, and that is not only about the second player. recompinput owns the
-    // remapping and the per-device profiles the controls tab writes, and
-    // profiles::get_n64_input is where they are applied: a port that reads SDL
-    // buttons itself, as this one used to, silently ignores every rebinding the
-    // player has made. It returns the stick already normalized, which is what
-    // the runtime wants (see the note further down).
-    if (controller_num < 0 || controller_num >= 2) {
-        return false;
-    }
-    // Player one always exists, because a keyboard is always attached: the
-    // assignment gives player one the keyboard profile as well as whatever pad
-    // it has, and get_n64_input merges the two, so the keys and the pad both
-    // play at any moment without either having to be chosen. Player two exists
-    // only once a second pad has been plugged in.
-    // A test script that drives player two stands in for a second pad.
-    if (controller_num == 1 && !recompinput::players::get_player_is_assigned(1) &&
-        !pw64::input_script_has_player_two()) {
+    // The pad and keyboard are read through the frontend rather than from SDL
+    // here. recompinput owns the remapping and the profiles the Controls tab
+    // writes, and profiles::get_n64_input is where they are applied: a port that
+    // reads SDL buttons itself silently ignores every rebinding. It returns the
+    // stick already normalized, which is what the runtime wants (see the note
+    // further down).
+    //
+    // Pilotwings 64 is one player, and the frontend is in single-player mode
+    // (src/frontend.cpp): get_n64_input merges the keyboard with every connected
+    // pad, so nothing has to be assigned before either plays.
+    if (controller_num != 0) {
         return false;
     }
 
@@ -421,14 +360,9 @@ void set_rumble(int controller_num, bool rumble) {
 
 ultramodern::input::connected_device_info_t get_connected_device_info(int controller_num) {
 #if PW64_WITH_FRONTEND
-    // The game asks this to decide which of its four controller ports has
-    // something in it, which is how two-player mode becomes available at all.
-    // A player slot with a pad -- or the keyboard, when there is no pad -- is a
-    // connected controller; the rest are empty. No Pak: the game reads the
-    // Controller Pak for its records and has no rumble code of its own.
-    if (controller_num == 0 ||
-        (controller_num == 1 && (recompinput::players::get_player_is_assigned(1) ||
-                                 pw64::input_script_has_player_two()))) {
+    // One controller in port 1, always: the keyboard plays when no pad is
+    // connected. No Pak: the game saves to the cartridge's EEPROM.
+    if (controller_num == 0) {
         return { ultramodern::input::Device::Controller, ultramodern::input::Pak::None };
     }
 #else

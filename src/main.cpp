@@ -380,6 +380,9 @@ int run(int argc, char** argv, const char* rom_arg) {
     recomp::start(config);
     std::fprintf(stderr, "[pw64] recomp::start returned -- runtime shut down\n");
     std::fflush(stderr);
+#if PW64_WITH_FRONTEND
+    pw64::frontend::shutdown();
+#endif
 
     pw64::shutdown_platform();
     std::fprintf(stderr, "[pw64] leaving main; anything after this is the C runtime tearing the process down\n");

@@ -1,20 +1,53 @@
 # Building
 
-The procedure, from a clean Windows machine to the game running. Why each step
-is the way it is lives in [PORTING.md](PORTING.md).
+The procedure, from a clean machine to the game running. Why each step is the
+way it is lives in [PORTING.md](PORTING.md).
 
-The port is built and tested on **Windows**. The recompilation steps run under
-Linux (WSL on Windows); the runtime and renderer support Linux and macOS, but
-this port has not been built or tested there.
+The port builds for **Windows** and **Linux** from this one tree. macOS is not
+supported. [Linux](#linux) has a script that does everything; Windows is step by
+step, below.
 
 You need your own dump of **Pilotwings 64 (USA)**:
 SHA-1 `ec771aedf54ee1b214c25404fb4ec51cfd43191a`. `.z64`, `.n64`, `.v64` or a ZIP
 holding one of them. Nothing else works, and nothing derived from the dump is
 ever committed.
 
-## Requirements
+## Linux
 
-### Windows
+Tested on Ubuntu 26.04 (x86-64).
+
+```sh
+git clone --recurse-submodules https://github.com/danielgomesvieira2000/pilotwings-64-recomp
+cd pilotwings-64-recomp
+bash tools/setup_linux.sh            # prints the packages that are missing
+bash tools/setup_linux.sh --install  # installs them, with sudo
+bash tools/build_linux.sh "/path/to/Pilotwings 64 (USA).z64"
+./build-linux/Pilotwings64Recomp
+```
+
+| Package | Needed by |
+|---|---|
+| `clang`, `lld` | the port (not GCC, which has miscompiled recompiled code) and the MIPS patches. A versioned `clang-21` counts; `build_linux.sh` picks the newest, and `PW64_CC`/`PW64_CXX` override it |
+| `cmake`, `ninja-build`, `pkg-config`, `git` | the build |
+| `gcc`, `make`, `rsync`, `python3`, `python3-venv`, `binutils-mips-linux-gnu` | the decompilation's build (IDO 5.3, splat) |
+| `libsdl2-dev`, `libfreetype-dev`, `libgtk-3-dev` | the window, input and audio; the menus' fonts; the dump picker |
+| `libvulkan-dev`, `mesa-vulkan-drivers`, `vulkan-tools` | RT64 renders through Vulkan on Linux. Skip the Mesa drivers if the NVIDIA or AMD proprietary stack is installed |
+
+The dump is needed on the first build only; after that `bash tools/build_linux.sh`
+rebuilds from source. Pass the dump again after changing
+`recomp/pilotwings64.us.toml`, and run `python3 tools/build_patches.py` after
+changing a patch.
+
+Settings and saves live in `$XDG_DATA_HOME/Pilotwings64Recomp`, or
+`~/.local/share/Pilotwings64Recomp`; a `portable.txt` beside the executable
+keeps them there instead.
+
+`python3 tools/package_release.py --version 0.1.0` makes the release archive
+(see *Packaging*).
+
+## Windows
+
+### Requirements
 
 | Tool | Why |
 |---|---|
@@ -53,7 +86,7 @@ sudo apt install build-essential cmake ninja-build git rsync \
 - `clang lld`: compiling the C patches for MIPS. Any version from 15 on; the
   newest installed is used.
 
-## 1. Clone
+### 1. Clone
 
 ```powershell
 git clone --recurse-submodules https://github.com/danielgomesvieira2000/pilotwings-64-recomp
@@ -62,7 +95,7 @@ cd pilotwings-64-recomp
 
 An existing clone without submodules: `git submodule update --init --recursive`.
 
-## 2. Patch the submodules
+### 2. Patch the submodules
 
 ```powershell
 python tools/patch_all.py
@@ -71,7 +104,7 @@ python tools/patch_all.py
 Idempotent; rerun after any submodule update. Each script says at its top what
 it changes and why.
 
-## 3. Build the recompilers
+### 3. Build the recompilers
 
 ```powershell
 wsl -d Ubuntu -- bash tools/wsl_build_recompiler.sh
@@ -79,7 +112,7 @@ wsl -d Ubuntu -- bash tools/wsl_build_recompiler.sh
 
 Builds N64Recomp and RSPRecomp into `lib/N64ModernRuntime/N64Recomp/build-linux`.
 
-## 4. Generate the game
+### 4. Generate the game
 
 ```powershell
 python tools/generate_game.py "C:\path\to\Pilotwings 64 (USA).z64"
@@ -104,7 +137,7 @@ wsl -d Ubuntu -- bash tools/recompile.sh
 python tools/build_patches.py
 ```
 
-## 5. Configure and build
+### 5. Configure and build
 
 ```powershell
 cmake -B build -G Ninja "-DCMAKE_C_COMPILER=clang-cl" "-DCMAKE_CXX_COMPILER=clang-cl" `
@@ -123,7 +156,7 @@ audio in time.
 The `PW64_WITH_*` switches exist so the tree builds at every stage: with all of
 them off, CMake builds only the skeleton executable (`--identify`).
 
-## 6. Run
+### 6. Run
 
 ```powershell
 build\Pilotwings64Recomp.exe

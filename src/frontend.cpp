@@ -27,6 +27,7 @@
 #include <recompui/renderer.h>
 #include <recompinput/players.h>
 #include <recompinput/input_mapping.h>
+#include <recompinput/profiles.h>
 
 #include <librecomp/config.hpp>
 #include <librecomp/game.hpp>
@@ -57,6 +58,11 @@ namespace {
 // otherwise: settings saved in the menu came back as defaults on the next run.
 std::filesystem::path config_directory() {
     return recomp::get_config_path();
+}
+
+// The key bindings, in the file recompui itself loads them from in finalize().
+std::filesystem::path controls_config_path() {
+    return config_directory() / (recompui::config::controls::id + ".json");
 }
 
 ultramodern::renderer::PresentationMode presentation_mode();
@@ -200,11 +206,18 @@ void init() {
 
     recompui::register_launcher_init_callback(build_launcher);
 
-    // Pilotwings 64 is a one-player game, so the controls tab offers one player
-    // slot rather than the frontend's default four. The first pad connected is
-    // assigned to it (refresh_players in src/callbacks.cpp), alongside the
-    // keyboard.
+    // Pilotwings 64 is a one-player game, so the frontend runs in single-player
+    // mode, as Rayman 2: Recompiled does. The Controls tab then shows one set of
+    // keyboard and controller bindings to edit directly, instead of player slots
+    // to assign devices to, and every connected pad and the keyboard play at
+    // once -- nothing has to be assigned before the game responds.
     recompinput::players::set_player_count_range(1, 1);
+    recompinput::players::set_single_player_mode(true);
+
+    // The single-player keyboard and controller profiles, created now so the
+    // defaults above are applied to them. finalize() would create them while
+    // loading controls.json, but a first run has no such file.
+    recompinput::profiles::initialize_input_bindings();
 
     // The prefab tabs. Pilotwings 64 has no gyro or mouse control and predates
     // the Rumble Pak, so the general tab keeps only what applies.
@@ -273,6 +286,14 @@ void init() {
 
     // Loads the player's saved settings from disk. Must come after every tab.
     recompui::config::finalize();
+
+    // The frontend saves bindings only from the Controls tab's close handler, so
+    // a rebind followed by closing the whole menu with Escape was lost, and a
+    // fresh install had no controls.json at all. The defaults are written now if
+    // there is none, and shutdown() writes whatever is in effect on the way out.
+    if (!std::filesystem::exists(controls_config_path())) {
+        recompinput::profiles::save_controls_config(controls_config_path());
+    }
 
     // Play fullscreen at the display's own resolution and aspect ratio.
     //
@@ -349,6 +370,10 @@ ultramodern::renderer::callbacks_t renderer_callbacks() {
 
 bool capturing_input() {
     return recompui::is_context_capturing_input();
+}
+
+void shutdown() {
+    recompinput::profiles::save_controls_config(controls_config_path());
 }
 
 }  // namespace pw64::frontend

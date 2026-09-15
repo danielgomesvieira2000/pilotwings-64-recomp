@@ -45,4 +45,8 @@ ultramodern::renderer::callbacks_t renderer_callbacks();
 // comment on poll_input() for the crash that skipping it caused.
 bool capturing_input();
 
+// Saves the key bindings in effect, so a rebind survives the menu being closed
+// some other way than through the Controls tab. Call after recomp::start returns.
+void shutdown();
+
 }  // namespace pw64::frontend

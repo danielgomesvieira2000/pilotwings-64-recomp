@@ -6,8 +6,8 @@ A built executable also contains, or ships beside, the following, under their ow
 terms. **Every release carries these license texts in its `licenses/` folder**;
 the list it is built from is `tools/third_party_licenses.txt`, and the texts that
 exist only in a source file's header are copied into `licenses/` in this
-repository. The port is built and tested on Windows; the Linux and macOS notes
-below describe what the shared runtime does on those platforms.
+repository. The port is built for Windows and Linux; the macOS notes below
+describe what the shared runtime does there, and are kept for completeness.
 
 Portions of this software are copyright © The FreeType Project
 (www.freetype.org). All rights reserved.
@@ -109,6 +109,11 @@ never edited. The patches in `patches/` include its headers, and those that
 replace a game function start from the decompilation's C for that function and
 say so in a comment above it; that code is used under the decompilation's MIT
 License, whose text ships in every release as `licenses/Pilotwings64Decomp.txt`.
+
+Building it uses the decompilation's own toolchain, fetched as its submodules
+and Python requirements and not shipped: [ido-static-recomp](https://github.com/decompals/ido-static-recomp)
+(IDO 5.3, recompiled for Linux), [splat](https://github.com/ethteck/splat) and
+[asm-processor](https://github.com/simonlindholm/asm-processor).
 
 Nothing the decompilation builds from the dump -- its split assets and
 assembly, the ELF, the ROM image -- is committed here.

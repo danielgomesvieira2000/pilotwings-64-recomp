@@ -1,51 +1,33 @@
 # Pilotwings 64: Recompiled
 
-A native PC port of Pilotwings 64, made by statically recompiling the game with
-[N64Recomp](https://github.com/N64Recomp/N64Recomp) and running it on
-N64ModernRuntime and the RT64 renderer. Unofficial, and not affiliated with
-Nintendo.
+A native PC port of Pilotwings 64 for Windows and Linux, made by statically
+recompiling the game with [N64Recomp](https://github.com/N64Recomp/N64Recomp).
 
-**You need your own dump of Pilotwings 64 (USA)**
-(sha1 `ec771aedf54ee1b214c25404fb4ec51cfd43191a`). No other version works, and
-none is included. Build the port (below), run it, and pick your dump in the
-launcher.
+Unofficial and not affiliated with Nintendo. **No game data is included**: you
+need your own dump of Pilotwings 64 (USA).
 
 ## Features
 
-- **Widescreen** at your display's shape: the 3D view fills the frame with the
-  game's field of view, the black overscan border is gone, objects at the edges
-  are not culled early, and the HUD sits at the frame's edges or at 16:9 or 4:3,
-  as you choose.
-- **High frame rate**: every object, the terrain, the sky and effects are
-  interpolated between the game's frames at your display's refresh rate, with
-  camera cuts detected so nothing smears across them. The game keeps its own
-  timing.
-- **Screen changes are instant.** Entering a menu or starting a test no longer
-  sits on a frozen frame for up to six seconds (a scheduling difference the
-  original hardware hid; see [docs/PORTING.md](docs/PORTING.md#threads-that-never-yield)).
-- A launcher with graphics, sound and controls settings, controller remapping,
-  keyboard play, and mod support.
-- Every vehicle and bonus mode runs; saves are written to your settings folder.
+- Widescreen at your display's aspect ratio, with the HUD at the screen edges
+- High frame rate through matrix interpolation, up to your display's refresh rate
+- No black overscan border
+- Instant screen changes (the original stalls up to six seconds on some menus)
+- Launcher with graphics, sound and controls settings, remapping and mod support
+- Keyboard and controller support
 
-## Building
+## Getting started
 
-Full instructions are in [docs/BUILDING.md](docs/BUILDING.md). On Windows, with
-Git, CMake, Ninja, LLVM, Python and the Visual Studio Build Tools installed, plus
-WSL Ubuntu with `build-essential cmake ninja-build rsync binutils-mips-linux-gnu
-python3-venv clang lld`:
+1. Download the build for your system from [Releases](../../releases).
+2. Extract it and run `Pilotwings64Recomp.exe` (Windows) or `Pilotwings64Recomp.sh` (Linux).
+3. Pick your dump in the launcher.
 
-```powershell
-git clone --recurse-submodules https://github.com/danielgomesvieira2000/pilotwings-64-recomp
-cd pilotwings-64-recomp
-python tools/patch_all.py
-wsl -d Ubuntu -- bash tools/wsl_build_recompiler.sh
-python tools/generate_game.py "Pilotwings 64 (USA).z64"
-cmake -B build -G Ninja "-DCMAKE_C_COMPILER=clang-cl" "-DCMAKE_CXX_COMPILER=clang-cl" "-DCMAKE_BUILD_TYPE=RelWithDebInfo" "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" "-DPW64_WITH_RUNTIME=ON" "-DPW64_WITH_RECOMPILED=ON" "-DPW64_WITH_FRONTEND=ON"
-cmake --build build --target Pilotwings64Recomp
-build\Pilotwings64Recomp.exe
-```
+The dump must be **Pilotwings 64 (USA)**, SHA-1
+`ec771aedf54ee1b214c25404fb4ec51cfd43191a`, as `.z64`, `.n64`, `.v64` or a ZIP.
 
-## Default keyboard controls
+On Linux the port needs a working Vulkan driver and the distribution's SDL2,
+GTK 3 and FreeType; see `README-LINUX.txt` in the download.
+
+### Default keyboard controls
 
 | N64 | Key | N64 | Key |
 |---|---|---|---|
@@ -54,36 +36,51 @@ build\Pilotwings64Recomp.exe
 | B | C | L / R | A / S |
 | C buttons | I J K L | D-pad | T F G H |
 
-Controllers are assigned as they are connected. Everything can be remapped in
-the launcher's Controls tab.
+## Building from source
+
+See [docs/BUILDING.md](docs/BUILDING.md). In short:
+
+```sh
+# Linux
+git clone --recurse-submodules https://github.com/danielgomesvieira2000/pilotwings-64-recomp
+cd pilotwings-64-recomp
+bash tools/setup_linux.sh --install
+bash tools/build_linux.sh "/path/to/Pilotwings 64 (USA).z64"
+```
+
+Windows builds the same way through WSL; the commands are in BUILDING.md.
 
 ## Documentation
 
-- [docs/BUILDING.md](docs/BUILDING.md) -- the build, step by step
-- [docs/PORTING.md](docs/PORTING.md) -- how the port works: the pipeline, the C
-  patches, widescreen, interpolation, and the testing tools
-- [docs/GAME-INTERNALS.md](docs/GAME-INTERNALS.md) -- what the game turned out
-  to be
-- [docs/](docs/README.md) -- the index, the build plan and the findings
+- [Building](docs/BUILDING.md)
+- [How the port works](docs/PORTING.md)
+- [Game internals](docs/GAME-INTERNALS.md)
+- [Changelog](CHANGELOG.md)
 
 ## Credits
 
-- **N64Recomp and N64ModernRuntime** by Mr-Wiseguy and contributors
-- **RT64** by Dario and contributors
-- **RecompFrontend** by the N64Recomp contributors
-- **[Pilotwings 64 decompilation](https://github.com/gcsmith/Pilotwings64Decomp)**
-  by Garrett Smith and contributors, which this port is built from
-- gcsmith's [Pilotwings64Recomp](https://github.com/gcsmith/Pilotwings64Recomp),
-  for the hardware-register instructions the runtime cannot serve
-- The harness and frontend come from
-  [Wave Race 64: Recompiled](https://github.com/danielgomesvieira2000/wave-race-64-recomp)
-- Written by Claude (Anthropic) in Claude Code, under the direction of Daniel
-  Gomes Vieira
+- [N64Recomp and N64ModernRuntime](https://github.com/N64Recomp) by Mr-Wiseguy and contributors
+- [RT64](https://github.com/rt64/rt64) by Dario and contributors
+- [RecompFrontend](https://github.com/N64Recomp/RecompFrontend) by the N64Recomp contributors
+- [Pilotwings 64 decompilation](https://github.com/gcsmith/Pilotwings64Decomp) by Garrett Smith (gcsmith) and contributors, which this port is built from
+- [Pilotwings64Recomp](https://github.com/gcsmith/Pilotwings64Recomp) by gcsmith, for identifying the hardware accesses the runtime cannot serve
+- [ido-static-recomp](https://github.com/decompals/ido-static-recomp) and [splat](https://github.com/ethteck/splat), used by the decompilation's build
+- [PromptFont](https://github.com/Shinmera/promptfont) by Yukari "Shinmera" Hafner, for the controller glyphs
+- The runtime harness and launcher come from [Wave Race 64: Recompiled](https://github.com/danielgomesvieira2000/wave-race-64-recomp)
 
-## Licensing
+Every third-party component and its license is listed in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-The project's own code is MIT ([LICENSE](LICENSE)). A built executable links
-N64ModernRuntime, which is GPL-3.0, so the executable is a GPL-3.0 combined work
-whose source is this repository at the commit it was built from. The executable
-also contains the game's code, recompiled from the builder's own dump. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for every component.
+## AI use
+
+This project was made with AI. Its code, patches, tools, documentation and
+artwork were written by Claude (Anthropic) in Claude Code, directed and tested
+by Daniel Gomes Vieira. The libraries and the decompilation it builds on are the
+work of the people credited above.
+
+## License
+
+The project's own code is [MIT](LICENSE). A built executable links
+N64ModernRuntime (GPL-3.0), so a distributed binary is a GPL-3.0 combined work
+whose source is this repository. The executable contains the game's code,
+recompiled from a dump; Pilotwings 64 is the property of Nintendo.
