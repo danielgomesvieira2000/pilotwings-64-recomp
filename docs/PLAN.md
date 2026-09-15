@@ -25,6 +25,9 @@ the findings goes in [PORTING.md](PORTING.md) (port facts) and
 >   audio path and frontend came from Wave Race 64: Recompiled and worked on the
 >   first run; what changed is in [findings/phase-00-04.md](findings/phase-00-04.md).
 > - The photo album has not been checked in widescreen.
+> - *Release 0.1* added a Linux build (tools/build_linux.sh, verified under
+>   WSL2 with software Vulkan) and the single-player Controls tab of Rayman 2:
+>   Recompiled.
 
 ## Goal
 

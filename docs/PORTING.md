@@ -141,7 +141,7 @@ What this game needed that Wave Race did not:
   `osMemSize`, so the copy lives at `0x80F00000`, above the patch data
   (`0x80801000`) and below librecomp's mod region (`0x81000000`).
 - **Presentation** is `PresentEarly`, which interpolation needs.
-- **Input is single-player**, as in Rayman 2: Recompiled.
+- **Input is single-player**, as in [Rayman 2: Recompiled](https://github.com/danielgomesvieira2000/rayman-2-the-great-escape-recomp).
   `recompinput::players::set_single_player_mode(true)` gives the Controls tab one
   set of keyboard and controller bindings to edit, and `get_n64_input` merges the
   keyboard with every connected pad, so nothing is assigned before either plays.

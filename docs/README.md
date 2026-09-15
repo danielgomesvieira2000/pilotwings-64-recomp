@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| [BUILDING.md](BUILDING.md) | From an empty Windows machine to the game running: the toolchain, WSL, the dump, the decompilation, N64Recomp, the patches, CMake, packaging. |
+| [BUILDING.md](BUILDING.md) | From an empty Linux or Windows machine to the game running: the one-command Linux build, the Windows toolchain and WSL, the dump, the decompilation, N64Recomp, the patches, CMake, packaging. |
 | [../CONTRIBUTING.md](../CONTRIBUTING.md) | The rules, chiefly about keeping the game's data out of the repository. |
 | [../CHANGELOG.md](../CHANGELOG.md) | What changed in each release. |
 

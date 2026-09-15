@@ -14,7 +14,7 @@ ever committed.
 
 ## Linux
 
-Tested on Ubuntu 26.04 (x86-64).
+Tested on Ubuntu 26.04 (x86-64) under WSL2, with Clang 21 and Mesa's software Vulkan (llvmpipe): builds from a clean clone, and plays through the menus into a flight at 20-25 frames per second, a limit of software rendering. Not yet run on Linux hardware with a GPU.
 
 ```sh
 git clone --recurse-submodules https://github.com/danielgomesvieira2000/pilotwings-64-recomp
@@ -175,7 +175,13 @@ the game.
 powershell -ExecutionPolicy Bypass -File tools/package_release.ps1 -BuildDir build -Version 0.1.0
 ```
 
-Stages the executable, the three DLLs it needs, `assets/`, the license texts
+```sh
+python3 tools/package_release.py --version 0.1.0    # Linux, from build-linux
+```
+
+On Linux the archive is a `.tar.gz` with the executable, a launcher script and
+a note on the distribution packages it needs at run time, with the debug info
+split into a second archive. On Windows it stages the executable, the three DLLs it needs, `assets/`, the license texts
 listed in `tools/third_party_licenses.txt`, and the notices into `dist/`, zips
 them, and zips the debug symbols separately. It refuses to package anything that
 looks like a dump or a save. The executable contains the game's code, recompiled;

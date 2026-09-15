@@ -66,7 +66,7 @@ Windows builds the same way through WSL; the commands are in BUILDING.md.
 - [Pilotwings64Recomp](https://github.com/gcsmith/Pilotwings64Recomp) by gcsmith, for identifying the hardware accesses the runtime cannot serve
 - [ido-static-recomp](https://github.com/decompals/ido-static-recomp) and [splat](https://github.com/ethteck/splat), used by the decompilation's build
 - [PromptFont](https://github.com/Shinmera/promptfont) by Yukari "Shinmera" Hafner, for the controller glyphs
-- The runtime harness and launcher come from [Wave Race 64: Recompiled](https://github.com/danielgomesvieira2000/wave-race-64-recomp)
+- The runtime harness and launcher come from [Wave Race 64: Recompiled](https://github.com/danielgomesvieira2000/wave-race-64-recomp), and the single-player controls setup from [Rayman 2: Recompiled](https://github.com/danielgomesvieira2000/rayman-2-the-great-escape-recomp)
 
 Every third-party component and its license is listed in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
