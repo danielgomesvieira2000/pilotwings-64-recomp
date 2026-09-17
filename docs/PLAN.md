@@ -24,7 +24,17 @@ the findings goes in [PORTING.md](PORTING.md) (port facts) and
 > - *Phases 05 and 06* have no findings document of their own: the harness,
 >   audio path and frontend came from Wave Race 64: Recompiled and worked on the
 >   first run; what changed is in [findings/phase-00-04.md](findings/phase-00-04.md).
-> - The photo album has not been checked in widescreen.
+> - **The photo album ("Check which photo ?") was broken in widescreen, and is
+>   fixed** (2026-09-17). Correct: a 3x2 grid of thumbnails in the black panel,
+>   empty slots as grey rectangles, a yellow box on the selected one. Under
+>   **Expand** each photo was drawn about twice its slot's size around the slot's
+>   centre, overlapping its neighbours, with coloured noise to the right of the
+>   grid; Original was right. Cause: the widened clip ratio (PORTING.md,
+>   Widescreen, step 4) also applied to the album's 80x60 photo channels, where
+>   clip ratio 1 is what crops each photo. Daniel confirmed the album under
+>   Expand after the fix. Changing the aspect ratio while the album is open
+>   blanks it below the title until the screen is reopened -- probably RT64
+>   rebuilding its render targets (inference, not fixed).
 > - *Release 0.1* added a Linux build (tools/build_linux.sh, verified under
 >   WSL2 with software Vulkan) and the single-player Controls tab of Rayman 2:
 >   Recompiled.

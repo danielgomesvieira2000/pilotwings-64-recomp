@@ -86,6 +86,18 @@ static s32 widenedClipRatio(s32 ratio) {
     return needed > ratio ? needed : ratio;
 }
 
+// The clip ratio for a channel draw: widened only for a channel that spans the
+// width of the screen, the only kind RT64 widens. The photo album draws each
+// photo through a channel with an 80x60 viewport, a full-screen scissor
+// (uvGfx_80222A98) and clip ratio 1 for everything, so the ratio is what crops
+// a photo to its slot; widened, every photo spilled to twice its slot's size.
+static s32 channelClipRatio(UnkStruct_80204D94* chan, s32 ratio) {
+    if (chan->viewX0 > 0 || chan->viewX1 < SCREEN_WIDTH) {
+        return ratio;
+    }
+    return widenedClipRatio(ratio);
+}
+
 // The aspect ratio of every 3D frustum the game builds for its inset viewport:
 // 0.4906542 / 0.35 == 0.7009346 / 0.5 == 300 / 214.
 #define INSET_ASPECT ((f32)(SUBSCREEN_X1 - SUBSCREEN_X0) / (f32)(SUBSCREEN_Y1 - SUBSCREEN_Y0))
@@ -373,11 +385,11 @@ RECOMP_PATCH void uvChan_80204FE4(s32 arg0) {
         uvGfx_80222A98();
     }
 
-    clipRatio(widenedClipRatio(1));
+    clipRatio(channelClipRatio(temp_s0, 1));
 
     _uvEnvDraw(arg0, temp_s0->unk2);
     if (!(temp_s0->unk0 & 8)) {
-        clipRatio(widenedClipRatio(2));
+        clipRatio(channelClipRatio(temp_s0, 2));
     }
     gDPPipeSync(gGfxDisplayListHead++);
     gSPSetGeometryMode(gGfxDisplayListHead++, G_ZBUFFER);

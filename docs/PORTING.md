@@ -226,7 +226,11 @@ game draw a frame that RT64 can widen, and anchoring the 2D.
    under clip ratio 1, which clips its triangles at the 4:3 edges: the terrain
    reached the sides and the sky and sea stopped short. Both passes get at least
    the widening, rounded up. *Symptom first suspected as the clear, which it was
-   not.*
+   not.* **Only for a channel spanning the screen's width**: the photo album
+   draws each photo through an 80x60 channel (`func_8033D3EC` in `app/snap.c`,
+   flags 11) whose scissor `uvGfx_80222A98` resets to the full screen, so clip
+   ratio 1 is the only thing cropping the photo to its slot. Widened to 2, every
+   photo spilled to twice its slot's size around its centre.
 5. **The border is not drawn.** Its four rectangles are dropped in `uvVtxRect`,
    because the vehicle select and options screens draw them inline rather than
    through `drawScreenBorder`. With those rectangles in a frame, **RT64 did not
