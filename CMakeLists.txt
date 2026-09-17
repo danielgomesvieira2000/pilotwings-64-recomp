@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20)
 
 # The deployment target has to be set before project(): it is what the compiler
 # check itself is run with, and RT64's Metal shader build reads it too. 15.0 is
@@ -9,7 +9,7 @@ if(CMAKE_HOST_APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
 endif()
 
 project(Pilotwings64Recomp
-    VERSION 0.1.0
+    VERSION 0.1.1
     DESCRIPTION "Native PC port of Pilotwings 64 via static recompilation"
     LANGUAGES C CXX)
 

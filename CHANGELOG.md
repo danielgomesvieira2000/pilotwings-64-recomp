@@ -4,6 +4,18 @@ Versions follow [semantic versioning](https://semver.org) loosely: while the
 project is below 1.0, the minor number moves when something a player would
 notice changes.
 
+## 0.1.1 -- Photo album in widescreen
+
+Fixed:
+
+- The photo album in widescreen: each photo was drawn about twice the size of
+  its slot, overlapping the others
+
+Known bugs:
+
+- Changing the aspect ratio while the photo album is open blanks it until the
+  album is reopened
+
 ## 0.1.0 -- First release
 
 Added:

@@ -42,7 +42,7 @@ Settings and saves live in `$XDG_DATA_HOME/Pilotwings64Recomp`, or
 `~/.local/share/Pilotwings64Recomp`; a `portable.txt` beside the executable
 keeps them there instead.
 
-`python3 tools/package_release.py --version 0.1.0` makes the release archive
+`python3 tools/package_release.py --version 0.1.1` makes the release archive
 (see *Packaging*).
 
 ## Windows
@@ -172,11 +172,11 @@ the game.
 ## Packaging
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File tools/package_release.ps1 -BuildDir build -Version 0.1.0
+powershell -ExecutionPolicy Bypass -File tools/package_release.ps1 -BuildDir build -Version 0.1.1
 ```
 
 ```sh
-python3 tools/package_release.py --version 0.1.0    # Linux, from build-linux
+python3 tools/package_release.py --version 0.1.1    # Linux, from build-linux
 ```
 
 On Linux the archive is a `.tar.gz` with the executable, a launcher script and
